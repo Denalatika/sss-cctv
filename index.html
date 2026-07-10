@@ -1,0 +1,1763 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SSS · Diseñador de Proyectos CCTV — Soluciones y Sistemas de Seguridad</title>
+<style>
+:root{
+  --azul:#0d2b45; --azul2:#123a5e; --acento:#00b894; --acento2:#00997e;
+  --rojo:#e74c3c; --naranja:#f39c12; --gris:#f4f6f8; --borde:#dde4ea;
+  --texto:#22313f; --texto2:#6b7d8f; --blanco:#ffffff; --amarillo:#ffd166;
+  --sombra:0 2px 12px rgba(13,43,69,.12);
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html,body{height:100%; overflow:hidden;}
+body{font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif; color:var(--texto); background:var(--gris);}
+button{font-family:inherit; cursor:pointer;}
+input,select,textarea{font-family:inherit; font-size:13px;}
+
+/* ---------- BARRA SUPERIOR ---------- */
+#topbar{position:fixed; top:0; left:0; right:0; height:52px; background:var(--azul); color:#fff;
+  display:flex; align-items:center; gap:10px; padding:0 14px; z-index:50; box-shadow:var(--sombra);}
+#topbar .logo{display:flex; align-items:center; gap:9px; font-weight:700; font-size:15px; letter-spacing:.3px;}
+#topbar .logo .cube{width:30px; height:30px; border-radius:8px; background:linear-gradient(135deg,var(--acento),#0984e3);
+  display:flex; align-items:center; justify-content:center; font-size:16px;}
+#topbar .logo small{display:block; font-weight:400; font-size:10px; opacity:.75; letter-spacing:.5px;}
+#projName{background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); color:#fff; border-radius:7px;
+  padding:6px 10px; width:230px; font-size:13px;}
+#projName::placeholder{color:rgba(255,255,255,.5);}
+.tb-btn{background:rgba(255,255,255,.1); color:#fff; border:1px solid rgba(255,255,255,.18); border-radius:7px;
+  padding:7px 12px; font-size:12.5px; display:flex; align-items:center; gap:6px; transition:.15s;}
+.tb-btn:hover{background:rgba(255,255,255,.22);}
+.tb-btn.primario{background:var(--acento); border-color:var(--acento);}
+.tb-btn.primario:hover{background:var(--acento2);}
+.tb-sep{width:1px; height:26px; background:rgba(255,255,255,.18); margin:0 2px;}
+.spacer{flex:1;}
+
+/* ---------- BARRA DE HERRAMIENTAS ---------- */
+#toolbar{position:fixed; top:64px; left:12px; width:56px; background:#fff; border-radius:12px; box-shadow:var(--sombra);
+  display:flex; flex-direction:column; align-items:center; padding:8px 0; gap:2px; z-index:40;}
+.tool{width:42px; height:42px; border:none; background:none; border-radius:9px; font-size:19px; display:flex;
+  align-items:center; justify-content:center; color:var(--texto2); position:relative; transition:.12s;}
+.tool:hover{background:var(--gris); color:var(--azul);}
+.tool.activa{background:var(--azul); color:#fff;}
+.tool .tip{position:absolute; left:52px; top:50%; transform:translateY(-50%); background:var(--azul); color:#fff;
+  font-size:11.5px; padding:5px 9px; border-radius:6px; white-space:nowrap; opacity:0; pointer-events:none; transition:.15s;}
+.tool:hover .tip{opacity:1;}
+.tool-sep{width:30px; height:1px; background:var(--borde); margin:4px 0;}
+
+/* ---------- LIENZO ---------- */
+#lienzoWrap{position:fixed; inset:52px 0 0 0; overflow:hidden; background:#e8edf2;}
+#lienzo{display:block; cursor:default; touch-action:none;}
+#btnMuro{position:fixed; bottom:104px; left:50%; transform:translateX(-50%); background:var(--acento); color:#fff;
+  border:none; border-radius:9px; padding:10px 18px; font-size:13.5px; font-weight:700; z-index:46; display:none; box-shadow:var(--sombra);}
+
+/* ---------- PANEL DERECHO ---------- */
+#panel{position:fixed; top:64px; right:12px; bottom:56px; width:308px; background:#fff; border-radius:12px;
+  box-shadow:var(--sombra); z-index:40; display:flex; flex-direction:column; overflow:hidden;}
+#panel.oculto{display:none;}
+#panelTitulo{padding:12px 14px; background:var(--azul); color:#fff; font-size:13.5px; font-weight:600;
+  display:flex; align-items:center; justify-content:space-between;}
+#panelTitulo button{background:none; border:none; color:#fff; font-size:15px;}
+#panelCuerpo{flex:1; overflow-y:auto; padding:12px 14px;}
+.campo{margin-bottom:11px;}
+.campo label{display:block; font-size:11.5px; color:var(--texto2); font-weight:600; margin-bottom:4px; text-transform:uppercase; letter-spacing:.4px;}
+.campo input[type=text],.campo input[type=number],.campo select,.campo textarea{width:100%; border:1px solid var(--borde);
+  border-radius:7px; padding:7px 9px; background:#fbfcfd;}
+.campo input[type=range]{width:100%;}
+.fila{display:flex; gap:8px;}
+.fila>.campo{flex:1;}
+.sw{display:flex; align-items:center; justify-content:space-between; padding:7px 0; font-size:13px;}
+.colores{display:flex; gap:6px; flex-wrap:wrap;}
+.colores .c{width:24px; height:24px; border-radius:6px; border:2px solid transparent; cursor:pointer;}
+.colores .c.sel{border-color:var(--azul);}
+.btn{border:none; border-radius:8px; padding:9px 12px; font-size:13px; font-weight:600; width:100%; margin-top:4px;}
+.btn.verde{background:var(--acento); color:#fff;}
+.btn.verde:hover{background:var(--acento2);}
+.btn.rojo{background:#fdecea; color:var(--rojo);}
+.btn.rojo:hover{background:#fadbd8;}
+.btn.gris{background:var(--gris); color:var(--texto);}
+.btn.azul{background:var(--azul); color:#fff;}
+.mini{font-size:11px; color:var(--texto2); margin-top:3px; line-height:1.45;}
+.dato-calc{background:#eef7f4; border:1px solid #cdeae2; border-radius:8px; padding:9px 11px; font-size:12.5px; margin-bottom:10px; line-height:1.7;}
+.dato-calc b{color:var(--acento2);}
+
+/* ---------- BARRA INFERIOR ---------- */
+#bottombar{position:fixed; bottom:12px; left:50%; transform:translateX(-50%); background:#fff; border-radius:12px;
+  box-shadow:var(--sombra); display:flex; align-items:center; gap:4px; padding:6px 10px; z-index:40;}
+#bottombar button{background:none; border:none; border-radius:7px; width:34px; height:34px; font-size:16px; color:var(--texto2);}
+#bottombar button:hover{background:var(--gris); color:var(--azul);}
+#zoomLbl{font-size:12.5px; font-weight:600; min-width:46px; text-align:center;}
+#pisoSel{border:1px solid var(--borde); border-radius:7px; padding:6px 8px; font-size:12.5px;}
+.bb-sep{width:1px; height:24px; background:var(--borde); margin:0 4px;}
+
+/* ---------- MODALES ---------- */
+.modal-fondo{position:fixed; inset:0; background:rgba(13,43,69,.55); z-index:100; display:none; align-items:center; justify-content:center;}
+.modal-fondo.abierto{display:flex;}
+.modal{background:#fff; border-radius:14px; width:min(860px,94vw); max-height:90vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,.3);}
+.modal.chico{width:min(520px,94vw);}
+.modal.grande{width:min(1060px,96vw);}
+.modal-cab{padding:16px 20px; background:var(--azul); color:#fff; font-size:16px; font-weight:700; display:flex; justify-content:space-between; align-items:center;}
+.modal-cab button{background:none; border:none; color:#fff; font-size:20px;}
+.modal-cuerpo{padding:18px 20px; overflow-y:auto;}
+.modal-pie{padding:13px 20px; border-top:1px solid var(--borde); display:flex; gap:10px; justify-content:flex-end;}
+.modal-pie .btn{width:auto;}
+
+/* Inicio */
+.inicio-grid{display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; margin-bottom:20px;}
+.inicio-card{border:2px solid var(--borde); border-radius:12px; padding:22px 16px; text-align:center; cursor:pointer; transition:.15s;}
+.inicio-card:hover{border-color:var(--acento); background:#f6fdfb; transform:translateY(-2px);}
+.inicio-card .ic{font-size:34px; margin-bottom:10px;}
+.inicio-card h3{font-size:14.5px; margin-bottom:6px;}
+.inicio-card p{font-size:12px; color:var(--texto2); line-height:1.5;}
+.recientes h4{font-size:13px; margin:8px 0; color:var(--texto2);}
+.reciente-item{display:flex; justify-content:space-between; align-items:center; padding:9px 12px; border:1px solid var(--borde);
+  border-radius:9px; margin-bottom:7px; cursor:pointer;}
+.reciente-item:hover{background:var(--gris);}
+.reciente-item small{color:var(--texto2);}
+
+/* Catálogo */
+.cat-grid{display:grid; grid-template-columns:1fr 1fr; gap:11px;}
+.cat-card{border:1.5px solid var(--borde); border-radius:11px; padding:13px; cursor:pointer; transition:.13s;}
+.cat-card:hover{border-color:var(--acento); background:#f6fdfb;}
+.cat-card h4{font-size:13.5px; color:var(--azul);}
+.cat-card .tipo{display:inline-block; font-size:10px; background:var(--azul); color:#fff; border-radius:5px; padding:2px 7px; margin:5px 0;}
+.cat-card p{font-size:11.5px; color:var(--texto2); line-height:1.55;}
+.cat-card .specs{font-size:11px; margin-top:6px; color:var(--texto);}
+
+/* Tablas */
+table.t{width:100%; border-collapse:collapse; font-size:12.5px;}
+table.t th{background:var(--azul); color:#fff; padding:8px 9px; text-align:left; font-size:11.5px; text-transform:uppercase; letter-spacing:.4px;}
+table.t td{padding:7px 9px; border-bottom:1px solid var(--borde);}
+table.t tr:nth-child(even) td{background:#fafbfc;}
+table.t input{width:80px; border:1px solid var(--borde); border-radius:5px; padding:4px 6px;}
+table.t input.ancho{width:100%;}
+.tot-row{font-weight:700; font-size:14px;}
+.tag{display:inline-block; font-size:10.5px; padding:2px 8px; border-radius:10px; background:var(--gris); color:var(--texto2);}
+
+/* Aviso flotante */
+#aviso{position:fixed; top:64px; left:50%; transform:translateX(-50%); background:var(--azul); color:#fff; padding:10px 18px;
+  border-radius:9px; font-size:13px; z-index:200; display:none; box-shadow:var(--sombra); max-width:70vw; text-align:center;}
+#hint{position:fixed; bottom:64px; left:50%; transform:translateX(-50%); background:rgba(13,43,69,.92); color:#ffd166;
+  padding:8px 16px; border-radius:8px; font-size:12.5px; z-index:45; display:none;}
+
+/* Submenú de objetos */
+.submenu{position:fixed; background:#fff; border-radius:10px; box-shadow:var(--sombra); padding:6px; z-index:60; display:none; flex-direction:column; gap:2px;}
+.submenu button{border:none; background:none; border-radius:7px; padding:8px 11px; font-size:13px; text-align:left; display:flex; gap:8px; align-items:center;}
+.submenu button:hover{background:var(--gris);}
+
+::-webkit-scrollbar{width:9px; height:9px;}
+::-webkit-scrollbar-thumb{background:#c3cdd6; border-radius:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+</style>
+</head>
+<body>
+<!-- ============ BARRA SUPERIOR ============ -->
+<div id="topbar">
+  <div class="logo"><div class="cube">🛡️</div><div>SSS Diseñador CCTV<small>Soluciones y Sistemas de Seguridad</small></div></div>
+  <div class="tb-sep"></div>
+  <input id="projName" type="text" placeholder="Nombre del proyecto..." value="Proyecto sin título">
+  <button class="tb-btn" onclick="abrirInicio()">🏠 <span>Inicio</span></button>
+  <button class="tb-btn" onclick="guardarProyecto()">💾 <span>Guardar</span></button>
+  <button class="tb-btn" onclick="document.getElementById('abrirArchivo').click()">📂 <span>Abrir</span></button>
+  <input type="file" id="abrirArchivo" accept=".json,.ssscctv" style="display:none">
+  <div class="spacer"></div>
+  <button class="tb-btn" onclick="abrirNotas()">📝 Notas</button>
+  <button class="tb-btn" onclick="abrirCotizacion()">💲 Cotización</button>
+  <button class="tb-btn" onclick="abrirAlmacen()">🗄️ Ancho de banda</button>
+  <button class="tb-btn" onclick="abrirRed()">🕸️ Diagrama de red</button>
+  <button class="tb-btn" onclick="exportarPNG()">🖼️ PNG</button>
+  <button class="tb-btn primario" onclick="generarReporte()">📄 Generar reporte</button>
+  <button class="tb-btn" onclick="abrirEmpresa()" title="Datos de la empresa">⚙️</button>
+</div>
+
+<!-- ============ HERRAMIENTAS ============ -->
+<div id="toolbar">
+  <button class="tool activa" data-tool="sel" onclick="setTool('sel')"><span>🖱️</span><span class="tip">Seleccionar / mover (V)</span></button>
+  <button class="tool" data-tool="pan" onclick="setTool('pan')"><span>✋</span><span class="tip">Mover vista (H o barra espaciadora)</span></button>
+  <div class="tool-sep"></div>
+  <button class="tool" data-tool="cam" onclick="setTool('cam')"><span>📹</span><span class="tip">Agregar cámara (C)</span></button>
+  <button class="tool" data-tool="dev" onclick="mostrarSubmenuDisp(event)"><span>🖥️</span><span class="tip">Agregar dispositivo (D)</span></button>
+  <button class="tool" data-tool="wall" onclick="setTool('wall')"><span>🧱</span><span class="tip">Dibujar muro (W) — bloquea la vista</span></button>
+  <button class="tool" data-tool="cable" onclick="setTool('cable')"><span>🔌</span><span class="tip">Conectar cable (L)</span></button>
+  <button class="tool" data-tool="obj" onclick="mostrarSubmenuObj(event)"><span>🚗</span><span class="tip">Agregar objeto (O)</span></button>
+  <button class="tool" data-tool="lbl" onclick="setTool('lbl')"><span>🏷️</span><span class="tip">Agregar etiqueta (T)</span></button>
+  <div class="tool-sep"></div>
+  <button class="tool" data-tool="cal" onclick="setTool('cal')"><span>📐</span><span class="tip">Calibrar escala (traza una distancia conocida)</span></button>
+  <button class="tool" onclick="deshacer()"><span>↩️</span><span class="tip">Deshacer (Ctrl+Z)</span></button>
+  <button class="tool" onclick="rehacer()"><span>↪️</span><span class="tip">Rehacer (Ctrl+Y)</span></button>
+  <button class="tool" onclick="borrarSeleccion()"><span>🗑️</span><span class="tip">Eliminar selección (Supr)</span></button>
+</div>
+
+<div class="submenu" id="submenuDisp">
+  <button onclick="agregarDispTool('nvr')">🗄️ NVR / Grabador</button>
+  <button onclick="agregarDispTool('switch')">🔀 Switch</button>
+  <button onclick="agregarDispTool('router')">🌐 Router</button>
+  <button onclick="agregarDispTool('ap')">📶 Access Point</button>
+  <button onclick="agregarDispTool('monitor')">🖥️ Monitor / PC</button>
+  <button onclick="agregarDispTool('ups')">🔋 UPS</button>
+  <button onclick="agregarDispTool('modem')">📡 Módem / WiFi</button>
+</div>
+<div class="submenu" id="submenuObj">
+  <button onclick="agregarObjTool('auto')">🚗 Automóvil</button>
+  <button onclick="agregarObjTool('persona')">🚶 Persona</button>
+  <button onclick="agregarObjTool('arbol')">🌳 Árbol</button>
+  <button onclick="agregarObjTool('porton')">🚪 Portón / Puerta</button>
+  <button onclick="agregarObjTool('nota')">📌 Nota de instalador</button>
+</div>
+<button id="btnMuro" onclick="terminarMuro()">✔ Terminar muro</button>
+
+<!-- ============ LIENZO ============ -->
+<div id="lienzoWrap"><canvas id="lienzo"></canvas></div>
+<div id="hint"></div>
+<div id="aviso"></div>
+
+<!-- ============ PANEL PROPIEDADES ============ -->
+<div id="panel" class="oculto">
+  <div id="panelTitulo"><span id="panelTituloTxt">Propiedades</span><button onclick="cerrarPanel()">✕</button></div>
+  <div id="panelCuerpo"></div>
+</div>
+
+<!-- ============ BARRA INFERIOR ============ -->
+<div id="bottombar">
+  <select id="pisoSel" onchange="cambiarPiso(this.value)"></select>
+  <button onclick="agregarPiso()" title="Agregar piso">➕</button>
+  <div class="bb-sep"></div>
+  <button onclick="zoomAjustar()" title="Ajustar a pantalla">🔲</button>
+  <button onclick="zoomRel(0.8)" title="Alejar">➖</button>
+  <span id="zoomLbl">100%</span>
+  <button onclick="zoomRel(1.25)" title="Acercar">➕</button>
+  <div class="bb-sep"></div>
+  <button id="btnCapas" onclick="abrirCapas(event)" title="Capas">🗂️</button>
+</div>
+<div class="submenu" id="submenuCapas"></div>
+
+<!-- ============ MODAL INICIO ============ -->
+<div class="modal-fondo abierto" id="modalInicio">
+  <div class="modal">
+    <div class="modal-cab"><span>🛡️ Nuevo proyecto — Soluciones y Sistemas de Seguridad</span><button onclick="cerrarModal('modalInicio')" id="btnCerrarInicio" style="display:none">✕</button></div>
+    <div class="modal-cuerpo">
+      <div class="inicio-grid">
+        <div class="inicio-card" onclick="document.getElementById('archivoPlano').click()">
+          <div class="ic">🗺️</div><h3>Subir plano o imagen</h3>
+          <p>Usa un plano, croquis o captura satelital (JPG o PNG) como fondo del diseño.</p>
+        </div>
+        <div class="inicio-card" onclick="nuevoProyectoVacio()">
+          <div class="ic">📋</div><h3>Fondo vacío</h3>
+          <p>Empieza con una cuadrícula en blanco y dibuja los muros del sitio.</p>
+        </div>
+        <div class="inicio-card" onclick="document.getElementById('abrirArchivo').click()">
+          <div class="ic">📂</div><h3>Abrir proyecto</h3>
+          <p>Carga un proyecto guardado (.json) para continuar donde lo dejaste.</p>
+        </div>
+      </div>
+      <input type="file" id="archivoPlano" accept="image/png,image/jpeg" style="display:none">
+      <div class="recientes" id="recientesWrap"><h4>Proyectos recientes en este equipo</h4><div id="listaRecientes"></div></div>
+      <p class="mini" style="margin-top:10px">💡 Consejo: para usar una imagen satelital, abre Google Maps, toma una captura de pantalla del sitio y súbela como plano. Después usa la herramienta 📐 <b>Calibrar escala</b> trazando una distancia que conozcas (por ejemplo, el frente del terreno).</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL CATÁLOGO ============ -->
+<div class="modal-fondo" id="modalCatalogo">
+  <div class="modal">
+    <div class="modal-cab"><span>📹 Catálogo de cámaras</span><button onclick="cerrarModal('modalCatalogo')">✕</button></div>
+    <div class="modal-cuerpo">
+      <div class="cat-grid" id="catGrid"></div>
+      <p class="mini" style="margin-top:12px">Los modelos marcados <span class="tag">verificado</span> tienen especificaciones confirmadas con las fichas del fabricante. Los demás son valores típicos: puedes ajustar lente, ángulo y alcance en el panel de propiedades después de colocar la cámara.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL COTIZACIÓN ============ -->
+<div class="modal-fondo" id="modalCotiza">
+  <div class="modal grande">
+    <div class="modal-cab"><span>💲 Cotización del proyecto (MXN, sin IVA)</span><button onclick="cerrarModal('modalCotiza')">✕</button></div>
+    <div class="modal-cuerpo" id="cotizaCuerpo"></div>
+    <div class="modal-pie">
+      <button class="btn gris" onclick="agregarItemManual()">➕ Agregar artículo manual</button>
+      <button class="btn verde" onclick="cerrarModal('modalCotiza')">Listo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL ALMACENAMIENTO ============ -->
+<div class="modal-fondo" id="modalAlmacen">
+  <div class="modal grande">
+    <div class="modal-cab"><span>🗄️ Calculadora de ancho de banda y almacenamiento</span><button onclick="cerrarModal('modalAlmacen')">✕</button></div>
+    <div class="modal-cuerpo" id="almacenCuerpo"></div>
+  </div>
+</div>
+
+<!-- ============ MODAL RED ============ -->
+<div class="modal-fondo" id="modalRed">
+  <div class="modal grande">
+    <div class="modal-cab"><span>🕸️ Diagrama de red</span><button onclick="cerrarModal('modalRed')">✕</button></div>
+    <div class="modal-cuerpo" id="redCuerpo" style="text-align:center"></div>
+    <div class="modal-pie"><button class="btn azul" onclick="imprimirRed()">🖨️ Imprimir diagrama</button></div>
+  </div>
+</div>
+
+<!-- ============ MODAL EMPRESA ============ -->
+<div class="modal-fondo" id="modalEmpresa">
+  <div class="modal chico">
+    <div class="modal-cab"><span>⚙️ Datos de la empresa (para reportes)</span><button onclick="cerrarModal('modalEmpresa')">✕</button></div>
+    <div class="modal-cuerpo">
+      <div class="campo"><label>Nombre de la empresa</label><input type="text" id="empNombre"></div>
+      <div class="fila">
+        <div class="campo"><label>Teléfono</label><input type="text" id="empTel"></div>
+        <div class="campo"><label>Correo</label><input type="text" id="empMail"></div>
+      </div>
+      <div class="campo"><label>Dirección / Sitio web</label><input type="text" id="empDir"></div>
+      <div class="campo"><label>Logo (opcional)</label><input type="file" id="empLogo" accept="image/*"></div>
+      <div class="campo"><label>Nombre del cliente para este proyecto</label><input type="text" id="empCliente"></div>
+      <div class="campo"><label>Estilo de íconos de cámara (para este proyecto)</label>
+        <select id="empEstilo">
+          <option value="circulo">🔴 Clásico — círculo de color</option>
+          <option value="cuadrado">🟥 Cuadrado redondeado</option>
+          <option value="flecha">📍 Con flecha de dirección</option>
+          <option value="emoji">📹 Solo símbolo, sin fondo</option>
+        </select></div>
+    </div>
+    <div class="modal-pie"><button class="btn verde" onclick="guardarEmpresa()">Guardar</button></div>
+  </div>
+</div>
+
+<!-- ============ MODAL NOTAS ============ -->
+<div class="modal-fondo" id="modalNotas">
+  <div class="modal chico">
+    <div class="modal-cab"><span>📝 Notas del instalador</span><button onclick="cerrarModal('modalNotas')">✕</button></div>
+    <div class="modal-cuerpo">
+      <p class="mini" style="margin-bottom:10px">🔒 Estas notas son internas: <b>no aparecen</b> en el reporte del cliente ni en la imagen exportada. Igual que las 📌 notas que puedes clavar sobre el plano.</p>
+      <textarea id="txtNotas" rows="12" style="width:100%; border:1px solid var(--borde); border-radius:8px; padding:10px; resize:vertical"
+        placeholder="Ej.: El cliente pidió que el cable suba por la esquina trasera. Hay toma de corriente junto al portón. Llevar escalera de 6 m..."></textarea>
+    </div>
+    <div class="modal-pie"><button class="btn verde" onclick="guardarNotas()">Guardar notas</button></div>
+  </div>
+</div>
+<script>
+"use strict";
+/* =====================================================================
+   SSS Diseñador CCTV — Soluciones y Sistemas de Seguridad
+   Aplicación local de una sola página. Los proyectos se guardan como
+   archivos .json y también se respaldan automáticamente en el navegador.
+   ===================================================================== */
+
+/* ---------- CATÁLOGO ANNKE (HFOV en grados, alcance IR en metros) ---------- */
+const CATALOGO = [
+ {id:"c800t", marca:"ANNKE", modelo:"C800 (I91BM) Turret", tipo:"Turret PoE", res:"4K · 8MP", lente:"2.8 mm", hfov:102, ir:30, verificado:true,
+  desc:"4K H.265+, visión nocturna EXIR 30 m, IP67, micrófono."},
+ {id:"c800b", marca:"ANNKE", modelo:"C800 (I91BD) Bullet", tipo:"Bullet PoE", res:"4K · 8MP", lente:"2.8 mm", hfov:102, ir:30, verificado:true,
+  desc:"4K H.265+, visión nocturna 30 m, IP67, exterior."},
+ {id:"nc800", marca:"ANNKE", modelo:"NC800 NightChroma", tipo:"Turret PoE", res:"4K · 8MP", lente:"2.8 mm", hfov:102, ir:30, verificado:true,
+  desc:"Visión nocturna a color f/1.0, sensor STARVIS 1/1.2\", 3072×1728."},
+ {id:"ncd800", marca:"ANNKE", modelo:"NCD800 Dual Panorámica", tipo:"Dual lente", res:"4K · 2×4MP", lente:"2×2.8 mm", hfov:180, ir:30, verificado:true,
+  desc:"Panorámica 180°, visión nocturna a color, luz y sirena disuasiva."},
+ {id:"fcd800", marca:"ANNKE", modelo:"FCD800 Dual 180°", tipo:"Dual lente", res:"8MP", lente:"2×2.8 mm", hfov:180, ir:30, verificado:true,
+  desc:"Doble lente panorámica 180° PoE para exteriores."},
+ {id:"c500", marca:"ANNKE", modelo:"C500 (5MP)", tipo:"Turret PoE", res:"5MP", lente:"2.8 mm", hfov:104, ir:30, verificado:false,
+  desc:"5MP H.265+, IP67. Valores típicos, ajustables."},
+ {id:"cz400", marca:"ANNKE", modelo:"CZ400 PTZ 4×", tipo:"PTZ PoE", res:"4MP", lente:"2.8–12 mm", hfov:100, ir:50, verificado:false,
+  desc:"PTZ con zoom óptico 4×; el ángulo varía entre ~100° (gran angular) y ~30° (tele)."},
+ {id:"generic", marca:"Genérica", modelo:"Cámara personalizada", tipo:"Cualquiera", res:"—", lente:"—", hfov:90, ir:30, verificado:false,
+  desc:"Define tú mismo el ángulo, alcance y demás datos en el panel."}
+];
+
+const TIPOS_DISP = {
+  nvr:{nombre:"NVR / Grabador", icono:"🗄️", color:"#8e6e53"},
+  switch:{nombre:"Switch", icono:"🔀", color:"#6c5ce7"},
+  router:{nombre:"Router", icono:"🌐", color:"#0984e3"},
+  ap:{nombre:"Access Point", icono:"📶", color:"#e17055"},
+  monitor:{nombre:"Monitor / PC", icono:"🖥️", color:"#636e72"},
+  ups:{nombre:"UPS", icono:"🔋", color:"#00b894"},
+  modem:{nombre:"Módem WiFi", icono:"📡", color:"#00a8ff"}
+};
+const TIPOS_OBJ = {auto:"🚗", persona:"🚶", arbol:"🌳", porton:"🚪", nota:"📌"};
+const PALETA = ["#e74c3c","#0984e3","#00b894","#e84393","#f39c12","#6c5ce7","#00cec9","#fdcb6e"];
+
+/* ---------- ESTADO ---------- */
+let S = null;            // proyecto actual
+let vista = {x:0, y:0, z:30};   // desplazamiento (px de pantalla) y zoom (px por metro)
+let tool = "sel";
+let seleccion = null;    // {tipo:'cam'|'dev'|'wall'|'obj'|'lbl'|'cable', id}
+let arrastre = null;
+let muroTemp = null;     // puntos del muro en dibujo
+let cableTemp = null;    // primer dispositivo del cable
+let calTemp = null;      // calibración
+let dispPend = null, objPend = null;
+let pilaUndo = [], pilaRedo = [];
+let canvas, ctx;
+
+function proyectoNuevo(){
+  return {
+    version:1, nombre:"Proyecto sin título", cliente:"",
+    empresa: JSON.parse(localStorage.getItem("sss_empresa")||"null") ||
+      {nombre:"Soluciones y Sistemas de Seguridad", tel:"", mail:"", dir:"", logo:null},
+    pisos:[{id:1, nombre:"Planta baja", bg:null, bgW:0, bgH:0, escala:20}], // escala = px de imagen por metro
+    pisoActivo:1, sig:1,
+    camaras:[], dispositivos:[], muros:[], objetos:[], etiquetas:[], cables:[],
+    itemsManuales:[], notas:"", estiloIcono:"circulo",
+    capas:{fov:true, muros:true, cables:true, etiquetas:true, objetos:true, fondo:true, wifi:true}
+  };
+}
+function piso(){ return S.pisos.find(p=>p.id===S.pisoActivo); }
+function uid(){ return ++S.sig; }
+function elemsPiso(arr){ return arr.filter(e=>e.piso===S.pisoActivo); }
+
+/* ---------- CONVERSIONES (mundo en metros ⇄ pantalla en px) ---------- */
+function aPantalla(p){ return {x:p.x*vista.z + vista.x, y:p.y*vista.z + vista.y}; }
+function aMundo(px,py){ return {x:(px-vista.x)/vista.z, y:(py-vista.y)/vista.z}; }
+
+/* ---------- GEOMETRÍA: intersección rayo-segmento ---------- */
+function interRayoSeg(ox,oy,dx,dy,x1,y1,x2,y2){
+  const rx=dx, ry=dy, sx=x2-x1, sy=y2-y1;
+  const den = rx*sy - ry*sx;
+  if (Math.abs(den) < 1e-9) return null;
+  const t = ((x1-ox)*sy - (y1-oy)*sx)/den;       // distancia sobre el rayo
+  const u = ((x1-ox)*ry - (y1-oy)*rx)/den;       // posición sobre el segmento
+  if (t>0 && u>=0 && u<=1) return t;
+  return null;
+}
+/* Polígono del FOV de una cámara, recortado por muros */
+function poligonoFOV(cam){
+  const segs = [];
+  if (S.capas.muros) for (const m of elemsPiso(S.muros)){
+    for (let i=0;i<m.pts.length-1;i++) segs.push([m.pts[i], m.pts[i+1]]);
+  }
+  const pasos = Math.max(14, Math.round(cam.fov/3));
+  const pts = [{x:cam.x, y:cam.y}];
+  const ini = (cam.rot - cam.fov/2) * Math.PI/180;
+  const fin = (cam.rot + cam.fov/2) * Math.PI/180;
+  for (let i=0;i<=pasos;i++){
+    const a = ini + (fin-ini)*i/pasos;
+    const dx = Math.cos(a), dy = Math.sin(a);
+    let dist = cam.alcance;
+    for (const [p1,p2] of segs){
+      const t = interRayoSeg(cam.x, cam.y, dx, dy, p1.x,p1.y, p2.x,p2.y);
+      if (t!==null && t<dist) dist = t;
+    }
+    pts.push({x:cam.x+dx*dist, y:cam.y+dy*dist});
+  }
+  return pts;
+}
+/* Cobertura WiFi: la señal atraviesa muros pero pierde ~60% de alcance en cada pared */
+function poligonoWifi(d){
+  const segs = [];
+  for (const m of elemsPiso(S.muros))
+    for (let i=0;i<m.pts.length-1;i++) segs.push([m.pts[i], m.pts[i+1]]);
+  const pasos = 90, pts = [];
+  for (let i=0;i<pasos;i++){
+    const a = i/pasos*Math.PI*2;
+    const dx=Math.cos(a), dy=Math.sin(a);
+    let px=d.x, py=d.y, rem=d.wifi.alcance, guarda=0;
+    while (rem>0.2 && guarda<6){
+      let mejor=null;
+      for (const [p1,p2] of segs){
+        const t = interRayoSeg(px,py,dx,dy,p1.x,p1.y,p2.x,p2.y);
+        if (t!==null && t>0.02 && t<rem && (mejor===null||t<mejor)) mejor=t;
+      }
+      if (mejor===null){ px+=dx*rem; py+=dy*rem; rem=0; }
+      else { px+=dx*(mejor+0.02); py+=dy*(mejor+0.02); rem=(rem-mejor)*0.4; }
+      guarda++;
+    }
+    pts.push({x:px, y:py});
+  }
+  return pts;
+}
+/* Ruta completa de un cable (equipo A → quiebres → equipo B) */
+function rutaCable(cb){
+  const A = buscarNodo(cb.a), B = buscarNodo(cb.b);
+  if (!A||!B) return null;
+  return [A, ...(cb.pts||[]), B];
+}
+function longitudRuta(ruta){
+  let L=0;
+  for (let i=0;i<ruta.length-1;i++) L += Math.hypot(ruta[i+1].x-ruta[i].x, ruta[i+1].y-ruta[i].y);
+  return L;
+}
+
+/* ---------- RENDER ---------- */
+function render(){
+  if (!S) return;
+  const w = canvas.width = canvas.clientWidth * devicePixelRatio;
+  const h = canvas.height = canvas.clientHeight * devicePixelRatio;
+  ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+  ctx.clearRect(0,0,w,h);
+  dibujarEscena(ctx, false);
+}
+function dibujarEscena(c, paraExport){
+  const p = piso();
+  // fondo
+  if (S.capas.fondo && p.bg && p._img){
+    const o = aPantalla({x:0,y:0});
+    const wm = p.bgW / p.escala, hm = p.bgH / p.escala;
+    c.drawImage(p._img, o.x, o.y, wm*vista.z, hm*vista.z);
+  }
+  // cuadrícula (cada 5 m)
+  if (!paraExport){
+    c.strokeStyle = "rgba(13,43,69,.07)"; c.lineWidth = 1;
+    const paso = 5*vista.z;
+    if (paso > 12){
+      const ox = vista.x % paso, oy = vista.y % paso;
+      c.beginPath();
+      for (let x=ox; x<canvas.clientWidth; x+=paso){ c.moveTo(x,0); c.lineTo(x,canvas.clientHeight); }
+      for (let y=oy; y<canvas.clientHeight; y+=paso){ c.moveTo(0,y); c.lineTo(canvas.clientWidth,y); }
+      c.stroke();
+    }
+  }
+  // cobertura WiFi (debajo de todo lo demás)
+  if (S.capas.wifi) for (const d of elemsPiso(S.dispositivos)){
+    if (!d.wifi || !d.wifi.ver) continue;
+    const pts = poligonoWifi(d).map(aPantalla);
+    c.beginPath(); c.moveTo(pts[0].x,pts[0].y);
+    for (const q of pts.slice(1)) c.lineTo(q.x,q.y);
+    c.closePath();
+    c.fillStyle="rgba(0,168,255,.14)"; c.fill();
+    c.strokeStyle="rgba(0,168,255,.55)"; c.lineWidth=1.5; c.setLineDash([6,5]); c.stroke(); c.setLineDash([]);
+  }
+  // FOV
+  if (S.capas.fov) for (const cam of elemsPiso(S.camaras)){
+    if (!cam.verFov) continue;
+    const pts = poligonoFOV(cam).map(aPantalla);
+    c.beginPath(); c.moveTo(pts[0].x, pts[0].y);
+    for (const q of pts.slice(1)) c.lineTo(q.x, q.y);
+    c.closePath();
+    c.fillStyle = hexA(cam.color, .32); c.fill();
+    c.strokeStyle = hexA(cam.color, .8); c.lineWidth = 1.5; c.stroke();
+  }
+  // muros
+  if (S.capas.muros) for (const m of elemsPiso(S.muros)){
+    c.beginPath();
+    const q0 = aPantalla(m.pts[0]); c.moveTo(q0.x,q0.y);
+    for (const pt of m.pts.slice(1)){ const q=aPantalla(pt); c.lineTo(q.x,q.y); }
+    c.strokeStyle = (seleccion && seleccion.tipo==="wall" && seleccion.id===m.id) ? "#e74c3c" : "#22313f";
+    c.lineWidth = Math.max(3, .25*vista.z); c.lineCap="round"; c.lineJoin="round"; c.stroke();
+  }
+  // muro en dibujo
+  if (muroTemp && muroTemp.length){
+    c.beginPath();
+    const q0 = aPantalla(muroTemp[0]); c.moveTo(q0.x,q0.y);
+    for (const pt of muroTemp.slice(1)){ const q=aPantalla(pt); c.lineTo(q.x,q.y); }
+    if (muroTemp._cursor){ const q=aPantalla(muroTemp._cursor); c.lineTo(q.x,q.y); }
+    c.strokeStyle="#e74c3c"; c.lineWidth=3; c.setLineDash([7,5]); c.stroke(); c.setLineDash([]);
+  }
+  // cables (con quiebres para rodear esquinas)
+  if (S.capas.cables) for (const cb of elemsPiso(S.cables)){
+    const ruta = rutaCable(cb); if (!ruta) continue;
+    const qs = ruta.map(aPantalla);
+    c.beginPath(); c.moveTo(qs[0].x,qs[0].y);
+    for (const q of qs.slice(1)) c.lineTo(q.x,q.y);
+    c.strokeStyle = cb.tipoCable==="fibra" ? "#f39c12" : (cb.tipoCable==="inalambrico" ? "#b2bec3" : "#e84393");
+    c.lineWidth = 2; if (cb.tipoCable==="inalambrico") c.setLineDash([4,6]);
+    c.stroke(); c.setLineDash([]);
+    // etiqueta de longitud a mitad de ruta
+    if (cb.tipoCable!=="inalambrico"){
+      const mid = qs[Math.floor((qs.length-1)/2)], mid2 = qs[Math.floor((qs.length-1)/2)+1] || mid;
+      const mx=(mid.x+mid2.x)/2, my=(mid.y+mid2.y)/2;
+      const txt = longitudRuta(ruta).toFixed(1)+" m";
+      c.font="600 10.5px 'Segoe UI',sans-serif";
+      const tw=c.measureText(txt).width;
+      c.fillStyle="rgba(232,67,147,.92)";
+      c.beginPath(); c.roundRect(mx-tw/2-5,my-9,tw+10,16,8); c.fill();
+      c.fillStyle="#fff"; c.textAlign="center"; c.textBaseline="middle"; c.fillText(txt,mx,my-1);
+    }
+    // manijas de edición cuando está seleccionado
+    if (!paraExport && seleccion && seleccion.tipo==="cable" && seleccion.id===cb.id){
+      for (let i=0;i<qs.length-1;i++){
+        const hx=(qs[i].x+qs[i+1].x)/2, hy=(qs[i].y+qs[i+1].y)/2;
+        c.beginPath(); c.arc(hx,hy,6,0,7);
+        c.fillStyle="#fff"; c.fill(); c.strokeStyle="#e84393"; c.lineWidth=2; c.stroke();
+        c.fillStyle="#e84393"; c.font="700 10px sans-serif"; c.textAlign="center"; c.textBaseline="middle"; c.fillText("+",hx,hy+0.5);
+      }
+      (cb.pts||[]).forEach(pt=>{
+        const q=aPantalla(pt);
+        c.beginPath(); c.arc(q.x,q.y,7,0,7);
+        c.fillStyle="#e84393"; c.fill(); c.strokeStyle="#fff"; c.lineWidth=2; c.stroke();
+      });
+    }
+  }
+  if (cableTemp){
+    const A = buscarNodo(cableTemp);
+    if (A){ const qa=aPantalla(A); c.beginPath(); c.arc(qa.x,qa.y,14,0,7); c.strokeStyle="#e84393"; c.lineWidth=3; c.stroke(); }
+  }
+  // objetos
+  if (S.capas.objetos) for (const o of elemsPiso(S.objetos)){
+    if (o.kind==="nota" && paraExport) continue;   // las notas de instalador NUNCA salen en exportaciones/reportes
+    const q = aPantalla(o);
+    if (o.kind==="nota"){
+      c.font = "22px serif"; c.textAlign="center"; c.textBaseline="middle";
+      c.fillText("📌", q.x, q.y);
+      const txt = (o.texto||"").slice(0,38) + ((o.texto||"").length>38?"…":"");
+      if (txt){
+        c.font="600 11px 'Segoe UI',sans-serif";
+        const tw=c.measureText(txt).width;
+        c.fillStyle="#fff8dc";
+        c.strokeStyle="#d4b84a"; c.lineWidth=1;
+        c.beginPath(); c.roundRect(q.x+12,q.y-11,tw+12,22,5); c.fill(); c.stroke();
+        c.fillStyle="#6b5d1f"; c.textAlign="left"; c.fillText(txt,q.x+18,q.y);
+      }
+      if (seleccion && seleccion.tipo==="obj" && seleccion.id===o.id) marcarSel(c,q);
+      continue;
+    }
+    c.font = `${Math.max(18, 1.6*vista.z)}px serif`;
+    c.textAlign="center"; c.textBaseline="middle";
+    c.fillText(TIPOS_OBJ[o.kind]||"❓", q.x, q.y);
+    if (seleccion && seleccion.tipo==="obj" && seleccion.id===o.id) marcarSel(c,q);
+  }
+  // dispositivos
+  for (const d of elemsPiso(S.dispositivos)){
+    const q = aPantalla(d);
+    const td = TIPOS_DISP[d.kind];
+    c.beginPath(); c.arc(q.x,q.y,16,0,7);
+    c.fillStyle = td.color; c.fill();
+    c.strokeStyle="#fff"; c.lineWidth=2.5; c.stroke();
+    c.font="15px serif"; c.textAlign="center"; c.textBaseline="middle"; c.fillText(td.icono,q.x,q.y);
+    etiquetaBajo(c, q, d.nombre + (d.ip?` · ${d.ip}`:""));
+    if (seleccion && seleccion.tipo==="dev" && seleccion.id===d.id) marcarSel(c,q);
+  }
+  // cámaras (con estilo de ícono del proyecto)
+  for (const cam of elemsPiso(S.camaras)){
+    const q = aPantalla(cam);
+    dibujarIconoCam(c, cam, q);
+    etiquetaBajo(c, q, cam.nombre);
+    if (seleccion && seleccion.tipo==="cam" && seleccion.id===cam.id){
+      marcarSel(c,q);
+      // manija de rotación/alcance
+      const man = manijaCam(cam), qm = aPantalla(man);
+      c.beginPath(); c.moveTo(q.x,q.y); c.lineTo(qm.x,qm.y);
+      c.strokeStyle="rgba(13,43,69,.5)"; c.lineWidth=1.5; c.setLineDash([4,4]); c.stroke(); c.setLineDash([]);
+      c.beginPath(); c.arc(qm.x,qm.y,8,0,7); c.fillStyle="#ffd166"; c.fill(); c.strokeStyle="#22313f"; c.lineWidth=2; c.stroke();
+    }
+  }
+  // etiquetas de texto
+  if (S.capas.etiquetas) for (const l of elemsPiso(S.etiquetas)){
+    const q = aPantalla(l);
+    c.font = `600 ${l.tam||14}px 'Segoe UI',sans-serif`;
+    const tw = c.measureText(l.texto).width;
+    c.fillStyle="rgba(13,43,69,.85)";
+    c.beginPath(); c.roundRect(q.x-tw/2-7, q.y-12, tw+14, 24, 6); c.fill();
+    c.fillStyle="#fff"; c.textAlign="center"; c.textBaseline="middle"; c.fillText(l.texto,q.x,q.y);
+    if (seleccion && seleccion.tipo==="lbl" && seleccion.id===l.id) marcarSel(c,q);
+  }
+  // calibración en curso
+  if (calTemp && calTemp.p1){
+    const q1=aPantalla(calTemp.p1);
+    c.beginPath(); c.arc(q1.x,q1.y,5,0,7); c.fillStyle="#e74c3c"; c.fill();
+    if (calTemp.cursor){ const q2=aPantalla(calTemp.cursor);
+      c.beginPath(); c.moveTo(q1.x,q1.y); c.lineTo(q2.x,q2.y);
+      c.strokeStyle="#e74c3c"; c.lineWidth=2.5; c.stroke(); }
+  }
+}
+function dibujarIconoCam(c, cam, q){
+  const est = S.estiloIcono || "circulo";
+  if (est === "emoji"){
+    c.save(); c.translate(q.x,q.y); c.rotate(cam.rot*Math.PI/180);
+    c.font="28px serif"; c.textAlign="center"; c.textBaseline="middle"; c.fillText("📹",0,0);
+    c.restore();
+    return;
+  }
+  if (est === "cuadrado"){
+    c.beginPath(); c.roundRect(q.x-16,q.y-16,32,32,8);
+    c.fillStyle=cam.color; c.fill(); c.strokeStyle="#fff"; c.lineWidth=2.5; c.stroke();
+  } else {
+    c.beginPath(); c.arc(q.x,q.y,16,0,7);
+    c.fillStyle=cam.color; c.fill(); c.strokeStyle="#fff"; c.lineWidth=2.5; c.stroke();
+  }
+  if (est === "flecha"){
+    // flecha exterior que marca hacia dónde apunta la cámara
+    const a = cam.rot*Math.PI/180;
+    const bx = q.x+Math.cos(a)*20, by = q.y+Math.sin(a)*20;
+    c.save(); c.translate(bx,by); c.rotate(a);
+    c.beginPath(); c.moveTo(9,0); c.lineTo(-3,-7); c.lineTo(-3,7); c.closePath();
+    c.fillStyle=cam.color; c.fill(); c.strokeStyle="#fff"; c.lineWidth=1.5; c.stroke();
+    c.restore();
+    c.font="14px serif"; c.textAlign="center"; c.textBaseline="middle"; c.fillText("📹",q.x,q.y);
+  } else {
+    c.save(); c.translate(q.x,q.y); c.rotate(cam.rot*Math.PI/180);
+    c.font="14px serif"; c.textAlign="center"; c.textBaseline="middle"; c.fillText("📹",0,0);
+    c.restore();
+  }
+}
+function manijaCam(cam){
+  const a = cam.rot*Math.PI/180;
+  return {x:cam.x+Math.cos(a)*cam.alcance, y:cam.y+Math.sin(a)*cam.alcance};
+}
+function marcarSel(c,q){
+  c.strokeStyle="#0984e3"; c.lineWidth=2; c.setLineDash([5,4]);
+  c.strokeRect(q.x-22,q.y-22,44,44); c.setLineDash([]);
+}
+function etiquetaBajo(c,q,txt){
+  if (!txt) return;
+  c.font="600 11px 'Segoe UI',sans-serif";
+  const tw = c.measureText(txt).width;
+  c.fillStyle="rgba(13,43,69,.8)";
+  c.beginPath(); c.roundRect(q.x-tw/2-5,q.y+19,tw+10,17,4); c.fill();
+  c.fillStyle="#fff"; c.textAlign="center"; c.textBaseline="middle"; c.fillText(txt,q.x,q.y+27.5);
+}
+function hexA(hex,a){
+  const n=parseInt(hex.slice(1),16);
+  return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`;
+}
+function buscarNodo(ref){
+  if (ref.t==="cam"){ const e=S.camaras.find(x=>x.id===ref.id); return e?{x:e.x,y:e.y}:null; }
+  const e=S.dispositivos.find(x=>x.id===ref.id); return e?{x:e.x,y:e.y}:null;
+}
+/* ---------- HERRAMIENTAS E INTERACCIÓN ---------- */
+function setTool(t){
+  tool = t; muroTemp=null; cableTemp=null; calTemp=null;
+  document.getElementById("btnMuro").style.display="none";
+  document.querySelectorAll(".tool[data-tool]").forEach(b=>b.classList.toggle("activa", b.dataset.tool===t));
+  const hints = {
+    cam:"Haz clic en el plano para colocar la cámara.",
+    wall:"Haz clic para trazar el muro punto por punto. Doble clic o Enter para terminar, Esc para cancelar.",
+    cable:"Haz clic en el primer equipo y luego en el segundo para conectarlos.",
+    lbl:"Haz clic donde quieras colocar la etiqueta.",
+    cal:"Traza una línea sobre una distancia que conozcas: clic al inicio y clic al final.",
+    dev:"Haz clic en el plano para colocar el dispositivo.",
+    obj:"Haz clic en el plano para colocar el objeto.",
+    pan:"Arrastra para mover la vista."
+  };
+  mostrarHint(hints[t]||"");
+  canvas.style.cursor = (t==="sel")?"default":(t==="pan"?"grab":"crosshair");
+  render();
+}
+function mostrarHint(txt){
+  const h = document.getElementById("hint");
+  h.textContent = txt; h.style.display = txt?"block":"none";
+}
+function mostrarAviso(txt, ms=2600){
+  const a = document.getElementById("aviso");
+  a.textContent = txt; a.style.display="block";
+  clearTimeout(a._t); a._t = setTimeout(()=>a.style.display="none", ms);
+}
+function mostrarSubmenuDisp(ev){ mostrarSubmenu(ev,"submenuDisp"); }
+function mostrarSubmenuObj(ev){ mostrarSubmenu(ev,"submenuObj"); }
+function mostrarSubmenu(ev,id){
+  ev.stopPropagation();
+  const m = document.getElementById(id);
+  const r = ev.currentTarget.getBoundingClientRect();
+  m.style.left = (r.right+8)+"px"; m.style.top = r.top+"px"; m.style.display="flex";
+}
+document.addEventListener("click",()=>{ document.querySelectorAll(".submenu").forEach(m=>m.style.display="none"); });
+function agregarDispTool(kind){ dispPend=kind; setTool("dev"); }
+function agregarObjTool(kind){ objPend=kind; setTool("obj"); }
+
+/* ---------- HISTORIAL ---------- */
+function snap(){ pilaUndo.push(JSON.stringify(S, filtroJson)); if (pilaUndo.length>60) pilaUndo.shift(); pilaRedo=[]; }
+function filtroJson(k,v){ return k==="_img" ? undefined : v; }
+function deshacer(){ if(!pilaUndo.length) return; pilaRedo.push(JSON.stringify(S,filtroJson)); restaurar(pilaUndo.pop()); }
+function rehacer(){ if(!pilaRedo.length) return; pilaUndo.push(JSON.stringify(S,filtroJson)); restaurar(pilaRedo.pop()); }
+function restaurar(json){
+  const imgs = {}; S.pisos.forEach(p=>imgs[p.id]=p._img);
+  S = JSON.parse(json);
+  S.pisos.forEach(p=>{ if(imgs[p.id]) p._img=imgs[p.id]; else if(p.bg) cargarImgPiso(p); });
+  seleccion=null; refrescarPisos(); cerrarPanel(); render();
+}
+
+/* ---------- EVENTOS DE RATÓN ---------- */
+function posMouse(ev){
+  const r = canvas.getBoundingClientRect();
+  return {px:ev.clientX-r.left, py:ev.clientY-r.top};
+}
+function elementoEn(px,py){
+  const m = aMundo(px,py);
+  const rIcono = 18/vista.z;
+  for (const cam of [...elemsPiso(S.camaras)].reverse()){
+    if (seleccion && seleccion.tipo==="cam" && seleccion.id===cam.id){
+      const man = manijaCam(cam);
+      if (Math.hypot(m.x-man.x,m.y-man.y) < 12/vista.z) return {tipo:"manija", id:cam.id};
+    }
+    if (Math.hypot(m.x-cam.x,m.y-cam.y) < rIcono) return {tipo:"cam", id:cam.id};
+  }
+  for (const d of [...elemsPiso(S.dispositivos)].reverse())
+    if (Math.hypot(m.x-d.x,m.y-d.y) < rIcono) return {tipo:"dev", id:d.id};
+  for (const o of [...elemsPiso(S.objetos)].reverse())
+    if (Math.hypot(m.x-o.x,m.y-o.y) < rIcono) return {tipo:"obj", id:o.id};
+  for (const l of [...elemsPiso(S.etiquetas)].reverse())
+    if (Math.hypot(m.x-l.x,m.y-l.y) < 20/vista.z) return {tipo:"lbl", id:l.id};
+  // manijas del cable seleccionado (quiebres y puntos medios para crear quiebres)
+  if (seleccion && seleccion.tipo==="cable"){
+    const cb = S.cables.find(x=>x.id===seleccion.id);
+    if (cb){
+      const ruta = rutaCable(cb);
+      if (ruta){
+        for (let i=0;i<(cb.pts||[]).length;i++)
+          if (Math.hypot(m.x-cb.pts[i].x, m.y-cb.pts[i].y) < 10/vista.z) return {tipo:"cwp", id:cb.id, idx:i};
+        for (let i=0;i<ruta.length-1;i++){
+          const hx=(ruta[i].x+ruta[i+1].x)/2, hy=(ruta[i].y+ruta[i+1].y)/2;
+          if (Math.hypot(m.x-hx, m.y-hy) < 9/vista.z) return {tipo:"cmid", id:cb.id, idx:i};
+        }
+      }
+    }
+  }
+  for (const cb of elemsPiso(S.cables)){
+    const ruta = rutaCable(cb); if (!ruta) continue;
+    for (let i=0;i<ruta.length-1;i++)
+      if (distSeg(m, ruta[i], ruta[i+1]) < 6/vista.z) return {tipo:"cable", id:cb.id};
+  }
+  for (const mu of elemsPiso(S.muros)){
+    for (let i=0;i<mu.pts.length-1;i++)
+      if (distSeg(m, mu.pts[i], mu.pts[i+1]) < 6/vista.z) return {tipo:"wall", id:mu.id};
+  }
+  return null;
+}
+function distSeg(p,a,b){
+  const dx=b.x-a.x, dy=b.y-a.y;
+  const t = Math.max(0, Math.min(1, ((p.x-a.x)*dx+(p.y-a.y)*dy)/(dx*dx+dy*dy||1)));
+  return Math.hypot(p.x-(a.x+dx*t), p.y-(a.y+dy*t));
+}
+
+function onDown(ev){
+  const {px,py} = posMouse(ev);
+  const m = aMundo(px,py);
+  if (ev.button===1 || tool==="pan" || ev.shiftKey){
+    arrastre = {modo:"pan", ix:px, iy:py, vx:vista.x, vy:vista.y};
+    canvas.style.cursor="grabbing"; return;
+  }
+  if (tool==="sel"){
+    const hit = elementoEn(px,py);
+    if (hit && hit.tipo==="manija"){
+      snap(); arrastre={modo:"manija", id:hit.id}; return;
+    }
+    if (hit && hit.tipo==="cwp"){
+      snap(); arrastre={modo:"cwp", id:hit.id, idx:hit.idx}; return;
+    }
+    if (hit && hit.tipo==="cmid"){
+      snap();
+      const cb = S.cables.find(x=>x.id===hit.id);
+      cb.pts = cb.pts||[];
+      // el punto medio i está después de (i-1) quiebres existentes → insertar en idx i
+      cb.pts.splice(hit.idx, 0, {x:m.x, y:m.y});
+      arrastre={modo:"cwp", id:hit.id, idx:hit.idx};
+      render(); return;
+    }
+    if (hit){
+      seleccion = hit; abrirPanelSel();
+      snap();
+      const el = obtenerElem(hit);
+      if (el && el.x!==undefined) arrastre={modo:"mover", hit, ox:el.x-m.x, oy:el.y-m.y};
+      else if (hit.tipo==="wall") arrastre={modo:"moverMuro", hit, ult:m};
+      render(); return;
+    }
+    seleccion=null; cerrarPanel(); render(); return;
+  }
+  if (tool==="cam"){
+    snap();
+    const c = {id:uid(), piso:S.pisoActivo, x:m.x, y:m.y, rot:0, fov:102, alcance:20,
+      color:PALETA[S.camaras.length % PALETA.length], nombre:"CAM-"+(S.camaras.length+1),
+      modelo:"ANNKE C800 (I91BM) Turret", res:"4K · 8MP", lente:"2.8 mm", altura:3, ip:"", verFov:true, precio:0, ir:30};
+    S.camaras.push(c); seleccion={tipo:"cam",id:c.id};
+    setTool("sel"); abrirPanelSel(); render();
+    mostrarAviso("Cámara agregada. Arrastra el punto amarillo para girarla y ajustar su alcance."); return;
+  }
+  if (tool==="dev"){
+    snap();
+    const kind = dispPend||"nvr";
+    const n = S.dispositivos.filter(d=>d.kind===kind).length+1;
+    const d = {id:uid(), piso:S.pisoActivo, x:m.x, y:m.y, kind,
+      nombre:TIPOS_DISP[kind].nombre.split(" ")[0]+"-"+n, ip:sigIP(), modelo:"", precio:0};
+    if (kind==="modem" || kind==="ap") d.wifi = {alcance:15, ver:true};
+    S.dispositivos.push(d); seleccion={tipo:"dev",id:d.id};
+    setTool("sel"); abrirPanelSel(); render();
+    if (d.wifi) mostrarAviso("La cobertura WiFi se dibuja en azul: los muros la reducen automáticamente.");
+    return;
+  }
+  if (tool==="obj"){
+    snap();
+    const kind = objPend||"auto";
+    const o = {id:uid(), piso:S.pisoActivo, x:m.x, y:m.y, kind};
+    if (kind==="nota"){
+      const t = prompt("Nota para los instaladores (no aparecerá en el reporte del cliente):","");
+      if (t===null) { render(); return; }
+      o.texto = t;
+    }
+    S.objetos.push(o); render(); return;
+  }
+  if (tool==="lbl"){
+    const txt = prompt("Texto de la etiqueta:","Zona");
+    if (txt){ snap(); S.etiquetas.push({id:uid(), piso:S.pisoActivo, x:m.x, y:m.y, texto:txt, tam:14}); }
+    setTool("sel"); render(); return;
+  }
+  if (tool==="wall"){
+    if (!muroTemp) muroTemp=[];
+    muroTemp.push({x:m.x, y:m.y});
+    if (muroTemp.length>=2) document.getElementById("btnMuro").style.display="block";
+    render(); return;
+  }
+  if (tool==="cable"){
+    const hit = elementoEn(px,py);
+    if (hit && (hit.tipo==="cam"||hit.tipo==="dev")){
+      const ref = {t:hit.tipo==="cam"?"cam":"dev", id:hit.id};
+      if (!cableTemp){ cableTemp=ref; mostrarHint("Ahora haz clic en el segundo equipo."); }
+      else if (!(cableTemp.t===ref.t && cableTemp.id===ref.id)){
+        snap();
+        S.cables.push({id:uid(), piso:S.pisoActivo, a:cableTemp, b:ref, tipoCable:"utp", pts:[]});
+        cableTemp=null; setTool("sel");
+        mostrarAviso("Conexión creada. Selecciónala y arrastra los puntos '+' para rodear esquinas.", 4200);
+      }
+      render();
+    } else mostrarAviso("Haz clic sobre una cámara o dispositivo.");
+    return;
+  }
+  if (tool==="cal"){
+    if (!calTemp || !calTemp.p1) calTemp={p1:{x:m.x,y:m.y}};
+    else {
+      const d = Math.hypot(m.x-calTemp.p1.x, m.y-calTemp.p1.y);
+      const real = parseFloat(prompt("¿Cuántos metros reales mide la línea que trazaste?","10"));
+      if (real>0){
+        snap();
+        const factor = d/real;   // metros actuales por metro real
+        reescalar(factor);
+        mostrarAviso("Escala calibrada correctamente.");
+      }
+      calTemp=null; setTool("sel");
+    }
+    render(); return;
+  }
+}
+function reescalar(f){
+  // convierte todas las coordenadas para que la nueva unidad sea el metro real
+  const p = piso();
+  p.escala = p.escala * f;
+  for (const arr of [S.camaras,S.dispositivos,S.objetos,S.etiquetas]){
+    for (const e of arr){ if(e.piso!==S.pisoActivo) continue; e.x/=f; e.y/=f; }
+  }
+  for (const mu of S.muros){ if(mu.piso!==S.pisoActivo) continue; mu.pts.forEach(pt=>{pt.x/=f; pt.y/=f;}); }
+  vista.z *= f;
+}
+function obtenerElem(hit){
+  const mapa = {cam:S.camaras, dev:S.dispositivos, obj:S.objetos, lbl:S.etiquetas, cable:S.cables, wall:S.muros};
+  return mapa[hit.tipo].find(e=>e.id===hit.id);
+}
+function onMove(ev){
+  const {px,py} = posMouse(ev);
+  const m = aMundo(px,py);
+  if (arrastre){
+    if (arrastre.modo==="pan"){
+      vista.x = arrastre.vx + (px-arrastre.ix);
+      vista.y = arrastre.vy + (py-arrastre.iy);
+    } else if (arrastre.modo==="mover"){
+      const el = obtenerElem(arrastre.hit);
+      el.x = m.x+arrastre.ox; el.y = m.y+arrastre.oy;
+    } else if (arrastre.modo==="moverMuro"){
+      const mu = obtenerElem(arrastre.hit);
+      const dx=m.x-arrastre.ult.x, dy=m.y-arrastre.ult.y;
+      mu.pts.forEach(pt=>{pt.x+=dx; pt.y+=dy;});
+      arrastre.ult=m;
+    } else if (arrastre.modo==="cwp"){
+      const cb = S.cables.find(x=>x.id===arrastre.id);
+      if (cb && cb.pts[arrastre.idx]) cb.pts[arrastre.idx] = {x:m.x, y:m.y};
+      const lbl = document.getElementById("pLongCable");
+      if (lbl && cb){ const r=rutaCable(cb); if(r) lbl.textContent = longitudRuta(r).toFixed(1); }
+    } else if (arrastre.modo==="manija"){
+      const cam = S.camaras.find(c=>c.id===arrastre.id);
+      cam.rot = Math.atan2(m.y-cam.y, m.x-cam.x)*180/Math.PI;
+      cam.alcance = Math.max(2, Math.min(300, Math.hypot(m.x-cam.x, m.y-cam.y)));
+      if (document.getElementById("propAlcance")) actualizarPanelCam(cam);
+    }
+    render(); return;
+  }
+  if (muroTemp){ muroTemp._cursor = m; render(); }
+  if (calTemp && calTemp.p1){ calTemp.cursor = m; render(); }
+  if (tool==="sel"){
+    const hit = elementoEn(px,py);
+    canvas.style.cursor = hit ? (hit.tipo==="manija"?"grab":"move") : "default";
+  }
+}
+function onUp(){
+  if (arrastre && arrastre.modo==="pan") canvas.style.cursor = tool==="pan"?"grab":"default";
+  arrastre=null;
+}
+function onDbl(ev){
+  if (tool==="wall" && muroTemp && muroTemp.length>=2){
+    terminarMuro(); return;
+  }
+  // doble clic sobre un quiebre de cable = eliminarlo
+  if (seleccion && seleccion.tipo==="cable"){
+    const {px,py} = posMouse(ev);
+    const m = aMundo(px,py);
+    const cb = S.cables.find(x=>x.id===seleccion.id);
+    if (cb && cb.pts){
+      const i = cb.pts.findIndex(pt=>Math.hypot(m.x-pt.x,m.y-pt.y) < 10/vista.z);
+      if (i>=0){ snap(); cb.pts.splice(i,1); abrirPanelSel(); render(); }
+    }
+  }
+  // doble clic sobre una nota = editar su texto
+  if (seleccion && seleccion.tipo==="obj"){
+    const o = obtenerElem(seleccion);
+    if (o && o.kind==="nota"){
+      const t = prompt("Editar nota:", o.texto||"");
+      if (t!==null){ o.texto=t; render(); }
+    }
+  }
+}
+function terminarMuro(){
+  document.getElementById("btnMuro").style.display="none";
+  if (muroTemp && muroTemp.length>=2){
+    snap();
+    delete muroTemp._cursor;
+    S.muros.push({id:uid(), piso:S.pisoActivo, pts:muroTemp.map(p=>({x:p.x,y:p.y}))});
+    mostrarAviso("Muro creado: ahora bloquea la vista de las cámaras.");
+  }
+  muroTemp=null; setTool("sel"); render();
+}
+function onWheel(ev){
+  ev.preventDefault();
+  const {px,py} = posMouse(ev);
+  const factor = ev.deltaY<0 ? 1.12 : 1/1.12;
+  const m = aMundo(px,py);
+  vista.z = Math.max(2, Math.min(400, vista.z*factor));
+  vista.x = px - m.x*vista.z;
+  vista.y = py - m.y*vista.z;
+  document.getElementById("zoomLbl").textContent = Math.round(vista.z/30*100)+"%";
+  render();
+}
+function zoomRel(f){
+  const cx = canvas.clientWidth/2, cy = canvas.clientHeight/2;
+  const m = aMundo(cx,cy);
+  vista.z = Math.max(2, Math.min(400, vista.z*f));
+  vista.x = cx-m.x*vista.z; vista.y = cy-m.y*vista.z;
+  document.getElementById("zoomLbl").textContent = Math.round(vista.z/30*100)+"%";
+  render();
+}
+function zoomAjustar(){
+  const p = piso();
+  let minX=0,minY=0,maxX=40,maxY=25;
+  if (p.bg){ maxX = p.bgW/p.escala; maxY = p.bgH/p.escala; }
+  const todos = [...elemsPiso(S.camaras),...elemsPiso(S.dispositivos),...elemsPiso(S.objetos)];
+  for (const e of todos){ minX=Math.min(minX,e.x-10); minY=Math.min(minY,e.y-10); maxX=Math.max(maxX,e.x+10); maxY=Math.max(maxY,e.y+10); }
+  const w=canvas.clientWidth, h=canvas.clientHeight;
+  vista.z = Math.max(2, Math.min(400, Math.min(w/(maxX-minX), h/(maxY-minY))*0.92));
+  vista.x = (w-(maxX+minX)*vista.z)/2;
+  vista.y = (h-(maxY+minY)*vista.z)/2;
+  document.getElementById("zoomLbl").textContent = Math.round(vista.z/30*100)+"%";
+  render();
+}
+function borrarSeleccion(){
+  if (!seleccion) return;
+  snap();
+  const mapa = {cam:S.camaras, dev:S.dispositivos, obj:S.objetos, lbl:S.etiquetas, cable:S.cables, wall:S.muros};
+  const arr = mapa[seleccion.tipo];
+  const i = arr.findIndex(e=>e.id===seleccion.id);
+  if (i>=0){
+    if (seleccion.tipo==="cam"||seleccion.tipo==="dev"){
+      const t = seleccion.tipo==="cam"?"cam":"dev";
+      S.cables = S.cables.filter(cb=>!((cb.a.t===t&&cb.a.id===seleccion.id)||(cb.b.t===t&&cb.b.id===seleccion.id)));
+    }
+    arr.splice(i,1);
+  }
+  seleccion=null; cerrarPanel(); render();
+}
+function sigIP(){
+  const usadas = new Set([...S.camaras,...S.dispositivos].map(e=>e.ip).filter(Boolean));
+  for (let i=2;i<255;i++){ const ip=`192.168.1.${i}`; if(!usadas.has(ip)) return ip; }
+  return "";
+}
+
+/* ---------- TECLADO ---------- */
+document.addEventListener("keydown", ev=>{
+  if (ev.target.tagName==="INPUT"||ev.target.tagName==="TEXTAREA"||ev.target.tagName==="SELECT") return;
+  const k = ev.key.toLowerCase();
+  if (ev.ctrlKey||ev.metaKey){
+    if (k==="z"){ ev.preventDefault(); deshacer(); }
+    if (k==="y"){ ev.preventDefault(); rehacer(); }
+    if (k==="s"){ ev.preventDefault(); guardarProyecto(); }
+    return;
+  }
+  if (k==="delete"||k==="backspace") borrarSeleccion();
+  if (k==="escape"){ muroTemp=null; cableTemp=null; calTemp=null; setTool("sel"); }
+  if (k==="enter" && muroTemp) terminarMuro();
+  if (k==="v") setTool("sel");
+  if (k==="h") setTool("pan");
+  if (k==="c") setTool("cam");
+  if (k==="w") setTool("wall");
+  if (k==="l") setTool("cable");
+  if (k==="t") setTool("lbl");
+});
+/* ---------- PANEL DE PROPIEDADES ---------- */
+function cerrarPanel(){ document.getElementById("panel").classList.add("oculto"); }
+function abrirPanelSel(){
+  if (!seleccion) return cerrarPanel();
+  const panel = document.getElementById("panel");
+  panel.classList.remove("oculto");
+  const cuerpo = document.getElementById("panelCuerpo");
+  const titulo = document.getElementById("panelTituloTxt");
+  const el = obtenerElem(seleccion);
+  if (!el) return cerrarPanel();
+
+  if (seleccion.tipo==="cam"){
+    titulo.textContent = "📹 Cámara";
+    const zonaCiega = (el.altura>0 && el.alcance>0) ? (el.altura*0.66).toFixed(1) : "0";
+    cuerpo.innerHTML = `
+      <div class="campo"><label>Nombre</label><input type="text" id="pNom" value="${esc(el.nombre)}"></div>
+      <div class="campo"><label>Modelo</label>
+        <div style="display:flex;gap:6px">
+          <input type="text" id="pMod" value="${esc(el.modelo)}" style="flex:1">
+          <button class="btn azul" style="width:auto;margin:0;padding:6px 10px" onclick="abrirCatalogo()">📚</button>
+        </div>
+        <div class="mini">${esc(el.res||"")} ${el.lente?("· lente "+esc(el.lente)):""}</div>
+      </div>
+      <div class="fila">
+        <div class="campo"><label>Ángulo de visión (°)</label><input type="number" id="pFov" min="10" max="360" value="${Math.round(el.fov)}"></div>
+        <div class="campo"><label>Alcance (m)</label><input type="number" id="propAlcance" min="1" max="300" value="${Math.round(el.alcance)}"></div>
+      </div>
+      <div class="fila">
+        <div class="campo"><label>Rotación (°)</label><input type="number" id="pRot" value="${Math.round(el.rot)}"></div>
+        <div class="campo"><label>Altura instalación (m)</label><input type="number" id="pAlt" step="0.5" min="0" value="${el.altura}"></div>
+      </div>
+      <div class="dato-calc" id="pCalc">📐 Con altura de <b>${el.altura} m</b>, la zona ciega bajo la cámara es de aprox. <b>${zonaCiega} m</b>.<br>🌙 Alcance IR del modelo: <b>${el.ir||30} m</b>${el.alcance>(el.ir||30)?" — ⚠️ el cono dibujado supera el alcance nocturno":""}.</div>
+      <div class="fila">
+        <div class="campo"><label>Dirección IP</label><input type="text" id="pIp" value="${esc(el.ip)}" placeholder="192.168.1.x"></div>
+        <div class="campo"><label>Precio (MXN)</label><input type="number" id="pPre" min="0" step="0.01" value="${el.precio||0}"></div>
+      </div>
+      <button class="btn gris" onclick="asignarIpSel()">🔢 Asignar siguiente IP libre</button>
+      <div class="campo"><label>Color del cono</label><div class="colores" id="pColores">${PALETA.map(c=>`<div class="c ${c===el.color?"sel":""}" style="background:${c}" onclick="setColorCam('${c}')"></div>`).join("")}</div></div>
+      <div class="sw"><span>Mostrar cono de visión</span><input type="checkbox" id="pVerFov" ${el.verFov?"checked":""}></div>
+      <button class="btn rojo" onclick="borrarSeleccion()">🗑️ Eliminar cámara</button>`;
+    const liga = (id,fn)=>{ const n=document.getElementById(id); n.addEventListener("input",()=>{fn(n); render(); actualizarPanelCam(el);}); };
+    liga("pNom",n=>el.nombre=n.value);
+    liga("pMod",n=>el.modelo=n.value);
+    liga("pFov",n=>el.fov=clamp(+n.value,10,360));
+    liga("propAlcance",n=>el.alcance=clamp(+n.value,1,300));
+    liga("pRot",n=>el.rot=+n.value);
+    liga("pAlt",n=>el.altura=Math.max(0,+n.value));
+    liga("pIp",n=>el.ip=n.value);
+    liga("pPre",n=>el.precio=+n.value||0);
+    document.getElementById("pVerFov").addEventListener("change",e=>{el.verFov=e.target.checked; render();});
+  }
+  else if (seleccion.tipo==="dev"){
+    titulo.textContent = TIPOS_DISP[el.kind].icono+" "+TIPOS_DISP[el.kind].nombre;
+    cuerpo.innerHTML = `
+      <div class="campo"><label>Nombre</label><input type="text" id="pNom" value="${esc(el.nombre)}"></div>
+      <div class="campo"><label>Modelo / marca</label><input type="text" id="pMod" value="${esc(el.modelo)}"></div>
+      <div class="fila">
+        <div class="campo"><label>Dirección IP</label><input type="text" id="pIp" value="${esc(el.ip)}"></div>
+        <div class="campo"><label>Precio (MXN)</label><input type="number" id="pPre" min="0" step="0.01" value="${el.precio||0}"></div>
+      </div>
+      ${el.wifi?`
+      <div class="campo"><label>Alcance WiFi sin obstáculos (m)</label><input type="number" id="pWifiAlc" min="3" max="80" value="${el.wifi.alcance}"></div>
+      <div class="sw"><span>Mostrar cobertura WiFi</span><input type="checkbox" id="pWifiVer" ${el.wifi.ver?"checked":""}></div>
+      <div class="dato-calc">📶 La mancha azul es la señal estimada: cada muro que atraviesa reduce el alcance restante en un <b>60%</b>. Es una aproximación para planear; el material real de la pared puede variar.</div>`:""}
+      <button class="btn gris" onclick="asignarIpSel()">🔢 Asignar siguiente IP libre</button>
+      <button class="btn rojo" onclick="borrarSeleccion()">🗑️ Eliminar dispositivo</button>`;
+    const liga = (id,fn)=>{ const n=document.getElementById(id); n.addEventListener("input",()=>{fn(n); render();}); };
+    liga("pNom",n=>el.nombre=n.value); liga("pMod",n=>el.modelo=n.value);
+    liga("pIp",n=>el.ip=n.value); liga("pPre",n=>el.precio=+n.value||0);
+    if (el.wifi){
+      liga("pWifiAlc",n=>el.wifi.alcance=clamp(+n.value,3,80));
+      document.getElementById("pWifiVer").addEventListener("change",e=>{el.wifi.ver=e.target.checked; render();});
+    }
+  }
+  else if (seleccion.tipo==="lbl"){
+    titulo.textContent = "🏷️ Etiqueta";
+    cuerpo.innerHTML = `
+      <div class="campo"><label>Texto</label><input type="text" id="pTxt" value="${esc(el.texto)}"></div>
+      <div class="campo"><label>Tamaño (${el.tam}px)</label><input type="range" id="pTam" min="10" max="40" value="${el.tam}"></div>
+      <button class="btn rojo" onclick="borrarSeleccion()">🗑️ Eliminar etiqueta</button>`;
+    document.getElementById("pTxt").addEventListener("input",e=>{el.texto=e.target.value; render();});
+    document.getElementById("pTam").addEventListener("input",e=>{el.tam=+e.target.value; render();});
+  }
+  else if (seleccion.tipo==="cable"){
+    titulo.textContent = "🔌 Conexión";
+    const ruta = rutaCable(el);
+    cuerpo.innerHTML = `
+      <div class="campo"><label>Tipo de cable</label>
+        <select id="pTipoCable">
+          <option value="utp" ${el.tipoCable==="utp"?"selected":""}>UTP / Ethernet</option>
+          <option value="fibra" ${el.tipoCable==="fibra"?"selected":""}>Fibra óptica</option>
+          <option value="inalambrico" ${el.tipoCable==="inalambrico"?"selected":""}>Inalámbrico</option>
+        </select></div>
+      <div class="dato-calc">📏 Longitud real de la ruta: <b><span id="pLongCable">${ruta?longitudRuta(ruta).toFixed(1):"?"}</span> m</b> · ${(el.pts||[]).length} quiebre(s).<br>
+      ➕ Arrastra los círculos blancos con "+" para <b>rodear esquinas</b> y obtener la distancia real del cable. Doble clic sobre un quiebre lo elimina.</div>
+      ${(el.pts||[]).length?'<button class="btn gris" onclick="quitarQuiebres()">🧹 Quitar todos los quiebres</button>':""}
+      <button class="btn rojo" onclick="borrarSeleccion()">🗑️ Eliminar conexión</button>`;
+    document.getElementById("pTipoCable").addEventListener("change",e=>{el.tipoCable=e.target.value; render();});
+  }
+  else if (seleccion.tipo==="wall"){
+    titulo.textContent = "🧱 Muro";
+    cuerpo.innerHTML = `
+      <p class="mini" style="margin-bottom:10px">Este muro bloquea el cono de visión de las cámaras. Puedes arrastrarlo completo con el ratón.</p>
+      <button class="btn rojo" onclick="borrarSeleccion()">🗑️ Eliminar muro</button>`;
+  }
+  else if (seleccion.tipo==="obj"){
+    if (el.kind==="nota"){
+      titulo.textContent = "📌 Nota de instalador";
+      cuerpo.innerHTML = `
+        <div class="campo"><label>Texto de la nota</label><textarea id="pNotaTxt" rows="4" style="width:100%;border:1px solid var(--borde);border-radius:7px;padding:8px">${esc(el.texto||"")}</textarea></div>
+        <p class="mini" style="margin-bottom:8px">🔒 Esta nota NO aparece en el reporte del cliente ni en la imagen PNG exportada.</p>
+        <button class="btn rojo" onclick="borrarSeleccion()">🗑️ Eliminar nota</button>`;
+      document.getElementById("pNotaTxt").addEventListener("input",e=>{el.texto=e.target.value; render();});
+    } else {
+      titulo.textContent = (TIPOS_OBJ[el.kind]||"")+" Objeto";
+      cuerpo.innerHTML = `<button class="btn rojo" onclick="borrarSeleccion()">🗑️ Eliminar objeto</button>`;
+    }
+  }
+}
+function actualizarPanelCam(el){
+  const calc = document.getElementById("pCalc");
+  if (!calc) return;
+  const alc = document.getElementById("propAlcance");
+  if (alc && document.activeElement!==alc) alc.value = Math.round(el.alcance);
+  const rot = document.getElementById("pRot");
+  if (rot && document.activeElement!==rot) rot.value = Math.round(el.rot);
+  const zonaCiega = (el.altura*0.66).toFixed(1);
+  calc.innerHTML = `📐 Con altura de <b>${el.altura} m</b>, la zona ciega bajo la cámara es de aprox. <b>${zonaCiega} m</b>.<br>🌙 Alcance IR del modelo: <b>${el.ir||30} m</b>${el.alcance>(el.ir||30)?" — ⚠️ el cono dibujado supera el alcance nocturno":""}.`;
+}
+function setColorCam(c){
+  const el = obtenerElem(seleccion); el.color=c;
+  document.querySelectorAll("#pColores .c").forEach(n=>n.classList.toggle("sel", n.style.background && rgb2hex(n.style.background)===c.toLowerCase()));
+  render();
+}
+function rgb2hex(rgb){
+  const m = rgb.match(/\d+/g); if(!m) return rgb;
+  return "#"+m.slice(0,3).map(v=>(+v).toString(16).padStart(2,"0")).join("");
+}
+function asignarIpSel(){ const el=obtenerElem(seleccion); el.ip=sigIP(); abrirPanelSel(); render(); }
+function quitarQuiebres(){
+  const cb = obtenerElem(seleccion);
+  if (cb){ snap(); cb.pts=[]; abrirPanelSel(); render(); }
+}
+function abrirNotas(){
+  document.getElementById("txtNotas").value = S.notas||"";
+  document.getElementById("modalNotas").classList.add("abierto");
+}
+function guardarNotas(){
+  S.notas = document.getElementById("txtNotas").value;
+  cerrarModal("modalNotas"); guardarLocal();
+  mostrarAviso("Notas guardadas (solo visibles para tu equipo).");
+}
+function clamp(v,a,b){ return Math.max(a,Math.min(b,isNaN(v)?a:v)); }
+function esc(s){ return String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;"); }
+
+/* ---------- CATÁLOGO ---------- */
+function abrirCatalogo(){
+  const g = document.getElementById("catGrid");
+  g.innerHTML = CATALOGO.map(c=>`
+    <div class="cat-card" onclick="aplicarModelo('${c.id}')">
+      <h4>${c.marca} ${c.modelo}</h4>
+      <span class="tipo">${c.tipo}</span> ${c.verificado?'<span class="tag" style="background:#eaf7f2;color:#00997e">verificado</span>':'<span class="tag">típico</span>'}
+      <p>${c.desc}</p>
+      <div class="specs">🎞️ ${c.res} &nbsp;·&nbsp; 🔍 ${c.lente} &nbsp;·&nbsp; 📐 ${c.hfov}° &nbsp;·&nbsp; 🌙 IR ${c.ir} m</div>
+    </div>`).join("");
+  document.getElementById("modalCatalogo").classList.add("abierto");
+}
+function aplicarModelo(id){
+  const c = CATALOGO.find(x=>x.id===id);
+  if (seleccion && seleccion.tipo==="cam"){
+    const cam = obtenerElem(seleccion);
+    snap();
+    cam.modelo = c.marca+" "+c.modelo; cam.res=c.res; cam.lente=c.lente;
+    cam.fov = c.hfov; cam.ir = c.ir;
+    abrirPanelSel(); render();
+  }
+  cerrarModal("modalCatalogo");
+}
+
+/* ---------- CAPAS, PISOS, MODALES ---------- */
+function cerrarModal(id){ document.getElementById(id).classList.remove("abierto"); }
+function abrirCapas(ev){
+  ev.stopPropagation();
+  const m = document.getElementById("submenuCapas");
+  const nombres = {fov:"Conos de visión", wifi:"Cobertura WiFi", muros:"Muros", cables:"Conexiones", etiquetas:"Etiquetas", objetos:"Objetos", fondo:"Imagen de fondo"};
+  m.innerHTML = Object.keys(nombres).map(k=>
+    `<button onclick="event.stopPropagation(); S.capas.${k}=!S.capas.${k}; abrirCapas(event); render();">${S.capas[k]?"✅":"⬜"} ${nombres[k]}</button>`).join("");
+  const r = document.getElementById("btnCapas").getBoundingClientRect();
+  m.style.left = r.left+"px"; m.style.top = (r.top-Object.keys(nombres).length*36-14)+"px";
+  m.style.display="flex";
+}
+function refrescarPisos(){
+  const sel = document.getElementById("pisoSel");
+  sel.innerHTML = S.pisos.map(p=>`<option value="${p.id}" ${p.id===S.pisoActivo?"selected":""}>${esc(p.nombre)}</option>`).join("");
+}
+function cambiarPiso(id){ S.pisoActivo=+id; seleccion=null; cerrarPanel(); render(); }
+function agregarPiso(){
+  const nombre = prompt("Nombre del nuevo piso:","Piso "+(S.pisos.length+1));
+  if (!nombre) return;
+  snap();
+  const p = {id:Math.max(...S.pisos.map(x=>x.id))+1, nombre, bg:null, bgW:0, bgH:0, escala:20};
+  S.pisos.push(p); S.pisoActivo=p.id;
+  refrescarPisos(); render();
+  if (confirm("¿Quieres subir un plano o imagen de fondo para este piso?"))
+    document.getElementById("archivoPlano").click();
+}
+/* ---------- COTIZACIÓN ---------- */
+function itemsCotizacion(){
+  const items = [];
+  const grupos = {};
+  for (const c of S.camaras){
+    const k = "CAM|"+c.modelo+"|"+(c.precio||0);
+    grupos[k] = grupos[k] || {desc:"Cámara "+c.modelo, cant:0, precio:c.precio||0, auto:true};
+    grupos[k].cant++;
+  }
+  for (const d of S.dispositivos){
+    const td = TIPOS_DISP[d.kind];
+    const k = "DEV|"+d.kind+"|"+(d.modelo||"")+"|"+(d.precio||0);
+    grupos[k] = grupos[k] || {desc:td.nombre+(d.modelo?" "+d.modelo:""), cant:0, precio:d.precio||0, auto:true};
+    grupos[k].cant++;
+  }
+  for (const k in grupos) items.push(grupos[k]);
+  for (const it of S.itemsManuales) items.push(it);
+  return items;
+}
+function abrirCotizacion(){
+  const cuerpo = document.getElementById("cotizaCuerpo");
+  const items = itemsCotizacion();
+  let sub=0;
+  const filas = items.map((it,i)=>{
+    const tot = it.cant*it.precio; sub+=tot;
+    const editable = !it.auto;
+    return `<tr>
+      <td>${editable?`<input class="ancho" value="${esc(it.desc)}" onchange="S.itemsManuales[${i-items.filter(x=>x.auto).length}].desc=this.value; abrirCotizacion()">`:esc(it.desc)} ${it.auto?'<span class="tag">del plano</span>':""}</td>
+      <td>${editable?`<input type="number" min="1" value="${it.cant}" onchange="S.itemsManuales[${i-items.filter(x=>x.auto).length}].cant=+this.value||1; abrirCotizacion()">`:it.cant}</td>
+      <td>${editable?`<input type="number" min="0" step="0.01" value="${it.precio}" onchange="S.itemsManuales[${i-items.filter(x=>x.auto).length}].precio=+this.value||0; abrirCotizacion()">`
+        :`<input type="number" min="0" step="0.01" value="${it.precio}" onchange="precioAuto(${i},this.value)">`}</td>
+      <td style="text-align:right">$ ${tot.toFixed(2)}</td>
+      <td>${editable?`<button class="btn rojo" style="width:auto;margin:0;padding:4px 9px" onclick="quitarManual(${i-items.filter(x=>x.auto).length})">✕</button>`:""}</td>
+    </tr>`;
+  }).join("");
+  const margen = S.margen||0;
+  const manoObra = S.manoObra||0;
+  const conMargen = sub*(1+margen/100) + (+manoObra);
+  cuerpo.innerHTML = `
+    <table class="t">
+      <thead><tr><th>Descripción</th><th>Cant.</th><th>Precio unit. (MXN)</th><th style="text-align:right">Total</th><th></th></tr></thead>
+      <tbody>${filas || '<tr><td colspan="5" style="text-align:center;color:#6b7d8f">Agrega cámaras y dispositivos al plano, o artículos manuales.</td></tr>'}</tbody>
+    </table>
+    <div style="display:flex; gap:16px; margin-top:14px; align-items:flex-end; flex-wrap:wrap">
+      <div class="campo" style="margin:0"><label>Margen / utilidad (%)</label>
+        <input type="number" min="0" style="width:110px;border:1px solid var(--borde);border-radius:7px;padding:7px 9px" value="${margen}" onchange="S.margen=+this.value||0; abrirCotizacion()"></div>
+      <div class="campo" style="margin:0"><label>Mano de obra / instalación (MXN)</label>
+        <input type="number" min="0" style="width:150px;border:1px solid var(--borde);border-radius:7px;padding:7px 9px" value="${manoObra}" onchange="S.manoObra=+this.value||0; abrirCotizacion()"></div>
+      <div style="flex:1"></div>
+      <div style="text-align:right">
+        <div style="font-size:13px;color:var(--texto2)">Subtotal equipos: <b>$ ${sub.toFixed(2)}</b></div>
+        <div style="font-size:19px;font-weight:800;color:var(--acento2)">TOTAL: $ ${conMargen.toFixed(2)} MXN (sin IVA)</div>
+      </div>
+    </div>
+    <p class="mini" style="margin-top:8px">Los precios de los artículos "del plano" se toman del campo Precio de cada cámara/dispositivo; si editas el precio aquí, se actualiza en todos los equipos de ese modelo.</p>`;
+  document.getElementById("modalCotiza").classList.add("abierto");
+}
+function precioAuto(idx, val){
+  const items = itemsCotizacion();
+  const it = items[idx]; if (!it) return;
+  const precio = +val||0;
+  for (const c of S.camaras) if ("Cámara "+c.modelo===it.desc) c.precio=precio;
+  for (const d of S.dispositivos){
+    const td=TIPOS_DISP[d.kind];
+    if (td.nombre+(d.modelo?" "+d.modelo:"")===it.desc) d.precio=precio;
+  }
+  abrirCotizacion();
+}
+function agregarItemManual(){
+  S.itemsManuales.push({desc:"Cable UTP cat6 (caja 305 m)", cant:1, precio:0, auto:false});
+  abrirCotizacion();
+}
+function quitarManual(i){ S.itemsManuales.splice(i,1); abrirCotizacion(); }
+
+/* ---------- ANCHO DE BANDA Y ALMACENAMIENTO ---------- */
+const BITRATE = { // Mbps aproximados por cámara con H.265 calidad media
+  "2MP":2.0, "4MP":3.5, "5MP":4.5, "8MP":6.0, "12MP":9.0
+};
+function resDeCam(c){
+  const r = (c.res||"").toUpperCase();
+  if (r.includes("12")) return "12MP";
+  if (r.includes("8")||r.includes("4K")) return "8MP";
+  if (r.includes("5")) return "5MP";
+  if (r.includes("4")) return "4MP";
+  return "4MP";
+}
+function abrirAlmacen(){
+  const cuerpo = document.getElementById("almacenCuerpo");
+  if (!S.camaras.length){ cuerpo.innerHTML = '<p style="color:var(--texto2)">Agrega cámaras al plano para calcular.</p>'; }
+  else {
+    let totalMbps = 0;
+    const filas = S.camaras.map(c=>{
+      const res = resDeCam(c);
+      const mbps = c.mbps!==undefined ? c.mbps : BITRATE[res];
+      totalMbps += mbps;
+      return `<tr><td>${esc(c.nombre)}</td><td>${esc(c.modelo)}</td><td>${res}</td>
+        <td><input type="number" step="0.1" min="0.1" value="${mbps}" onchange="ajustarMbps(${c.id},this.value)"> Mbps</td></tr>`;
+    }).join("");
+    const horas = S.horasDia||24;
+    const gbDia = totalMbps/8 * 3600 * horas / 1024; // GB por día
+    const tabla = [0.5,1,2,4,6,8,10,16,20,24].map(tb=>{
+      const dias = Math.floor(tb*1024/gbDia);
+      return `<div style="border:1px solid var(--borde);border-radius:9px;padding:10px 14px;text-align:center;min-width:90px">
+        <div style="font-size:12px;color:var(--texto2)">${tb} TB</div>
+        <div style="font-size:20px;font-weight:800;color:var(--acento2)">${isFinite(dias)?dias:"—"}</div>
+        <div style="font-size:11px;color:var(--texto2)">días</div></div>`;
+    }).join("");
+    cuerpo.innerHTML = `
+      <table class="t"><thead><tr><th>Cámara</th><th>Modelo</th><th>Resolución</th><th>Tasa de bits (editable)</th></tr></thead>
+      <tbody>${filas}</tbody></table>
+      <div style="display:flex;gap:18px;align-items:center;margin:16px 0;flex-wrap:wrap">
+        <div class="dato-calc" style="margin:0">📡 Ancho de banda total: <b>${totalMbps.toFixed(1)} Mbps</b></div>
+        <div class="campo" style="margin:0"><label>Horas de grabación al día</label>
+          <input type="number" min="1" max="24" value="${horas}" style="width:90px;border:1px solid var(--borde);border-radius:7px;padding:7px 9px" onchange="S.horasDia=clamp(+this.value,1,24); abrirAlmacen()"></div>
+        <div class="dato-calc" style="margin:0">💾 Consumo diario: <b>${gbDia.toFixed(0)} GB/día</b></div>
+      </div>
+      <h4 style="margin-bottom:10px">Días de grabación según disco duro</h4>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">${tabla}</div>
+      <p class="mini" style="margin-top:10px">Estimación con H.265 en calidad media y grabación continua. La detección de movimiento puede multiplicar los días de retención por 2–3×. Ajusta la tasa de bits por cámara si usas otro códec o calidad.</p>`;
+  }
+  document.getElementById("modalAlmacen").classList.add("abierto");
+}
+function ajustarMbps(id,val){ const c=S.camaras.find(x=>x.id===id); if(c) c.mbps=+val||1; abrirAlmacen(); }
+
+/* ---------- DIAGRAMA DE RED ---------- */
+function construirRed(){
+  const nodos = [];
+  for (const c of S.camaras) nodos.push({ref:{t:"cam",id:c.id}, nombre:c.nombre, sub:c.modelo, ip:c.ip, icono:"📹", color:"#e74c3c"});
+  for (const d of S.dispositivos) nodos.push({ref:{t:"dev",id:d.id}, nombre:d.nombre, sub:TIPOS_DISP[d.kind].nombre, ip:d.ip, icono:TIPOS_DISP[d.kind].icono, color:TIPOS_DISP[d.kind].color});
+  const enlaces = S.cables.map(cb=>({a:cb.a, b:cb.b, tipo:cb.tipoCable}));
+  return {nodos, enlaces};
+}
+function abrirRed(){
+  const {nodos, enlaces} = construirRed();
+  const cuerpo = document.getElementById("redCuerpo");
+  if (!nodos.length){ cuerpo.innerHTML='<p style="color:var(--texto2)">Agrega equipos y conéctalos con la herramienta 🔌 para ver el diagrama.</p>'; }
+  else cuerpo.innerHTML = svgRed(nodos, enlaces, 980, 560);
+  document.getElementById("modalRed").classList.add("abierto");
+}
+function svgRed(nodos, enlaces, W, H){
+  // organiza por niveles: routers/NVR arriba, switches en medio, cámaras abajo
+  const nivelDe = n => {
+    const s=(n.sub||"").toLowerCase();
+    if (s.includes("router")) return 0;
+    if (s.includes("nvr")||s.includes("monitor")||s.includes("ups")) return 1;
+    if (s.includes("switch")||s.includes("access")) return 2;
+    return 3;
+  };
+  const niveles = [[],[],[],[]];
+  nodos.forEach(n=>niveles[nivelDe(n)].push(n));
+  const pos = new Map();
+  niveles.forEach((fila,fi)=>{
+    fila.forEach((n,i)=>{
+      pos.set(claveRef(n.ref), {x:(i+1)*W/(fila.length+1), y:80+fi*(H-140)/3, n});
+    });
+  });
+  let svg = `<svg id="svgRed" xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" style="background:#fff;border:1px solid #dde4ea;border-radius:10px;max-width:100%">`;
+  for (const e of enlaces){
+    const A = pos.get(claveRef(e.a)), B = pos.get(claveRef(e.b));
+    if (!A||!B) continue;
+    const color = e.tipo==="fibra"?"#f39c12":(e.tipo==="inalambrico"?"#b2bec3":"#e84393");
+    const dash = e.tipo==="inalambrico"?'stroke-dasharray="4 6"':"";
+    svg += `<line x1="${A.x}" y1="${A.y}" x2="${B.x}" y2="${B.y}" stroke="${color}" stroke-width="2" ${dash}/>`;
+  }
+  for (const [,p] of pos){
+    svg += `<g><circle cx="${p.x}" cy="${p.y}" r="22" fill="${p.n.color}" stroke="#fff" stroke-width="3"/>
+      <text x="${p.x}" y="${p.y+1}" text-anchor="middle" dominant-baseline="middle" font-size="17">${p.n.icono}</text>
+      <text x="${p.x}" y="${p.y+38}" text-anchor="middle" font-size="11.5" font-weight="700" fill="#22313f" font-family="Segoe UI">${esc(p.n.nombre)}</text>
+      <text x="${p.x}" y="${p.y+52}" text-anchor="middle" font-size="10" fill="#6b7d8f" font-family="Segoe UI">${esc(p.n.ip||"sin IP")}</text></g>`;
+  }
+  svg += `<g font-family="Segoe UI" font-size="11">
+    <rect x="12" y="${H-64}" width="170" height="54" rx="8" fill="#f4f6f8"/>
+    <line x1="22" y1="${H-48}" x2="52" y2="${H-48}" stroke="#e84393" stroke-width="2"/><text x="58" y="${H-44}">UTP</text>
+    <line x1="22" y1="${H-32}" x2="52" y2="${H-32}" stroke="#f39c12" stroke-width="2"/><text x="58" y="${H-28}">Fibra</text>
+    <line x1="22" y1="${H-16}" x2="52" y2="${H-16}" stroke="#b2bec3" stroke-width="2" stroke-dasharray="4 6"/><text x="58" y="${H-12}">Inalámbrico</text>
+  </g></svg>`;
+  return svg;
+}
+function claveRef(r){ return r.t+"_"+r.id; }
+function imprimirRed(){
+  const svg = document.getElementById("svgRed");
+  if (!svg) return;
+  const v = window.open("","_blank");
+  v.document.write(`<html><head><title>Diagrama de red — ${esc(S.nombre)}</title></head>
+    <body style="font-family:Segoe UI,sans-serif;text-align:center">
+    <h2>${esc(S.empresa.nombre)} — Diagrama de red</h2><h3>${esc(S.nombre)}</h3>${svg.outerHTML}
+    <script>window.onload=()=>window.print()<\/script></body></html>`);
+  v.document.close();
+}
+/* ---------- EXPORTAR PNG DEL PLANO ---------- */
+function renderExport(){
+  const p = piso();
+  // calcula límites
+  let minX=0,minY=0,maxX=40,maxY=25;
+  if (p.bg){ maxX=p.bgW/p.escala; maxY=p.bgH/p.escala; }
+  for (const e of [...elemsPiso(S.camaras),...elemsPiso(S.dispositivos),...elemsPiso(S.objetos),...elemsPiso(S.etiquetas)]){
+    minX=Math.min(minX,e.x-8); minY=Math.min(minY,e.y-8); maxX=Math.max(maxX,e.x+8); maxY=Math.max(maxY,e.y+8);
+  }
+  for (const mu of elemsPiso(S.muros)) for (const pt of mu.pts){
+    minX=Math.min(minX,pt.x-2); minY=Math.min(minY,pt.y-2); maxX=Math.max(maxX,pt.x+2); maxY=Math.max(maxY,pt.y+2);
+  }
+  const escala = Math.min(1600/(maxX-minX), 1100/(maxY-minY));
+  const off = document.createElement("canvas");
+  off.width = Math.round((maxX-minX)*escala); off.height = Math.round((maxY-minY)*escala);
+  const c2 = off.getContext("2d");
+  c2.fillStyle="#f2f5f7"; c2.fillRect(0,0,off.width,off.height);
+  const vAnt = {...vista}, cAnt = canvas;
+  vista = {x:-minX*escala, y:-minY*escala, z:escala};
+  canvas = off;
+  dibujarEscena(c2, true);
+  canvas = cAnt; vista = vAnt;
+  return off;
+}
+function exportarPNG(){
+  const off = renderExport();
+  const a = document.createElement("a");
+  a.download = (S.nombre||"plano")+" - "+piso().nombre+".png";
+  a.href = off.toDataURL("image/png");
+  a.click();
+  mostrarAviso("Imagen del plano descargada.");
+}
+
+/* ---------- REPORTE PDF ---------- */
+function generarReporte(){
+  const fecha = new Date().toLocaleDateString("es-MX",{year:"numeric",month:"long",day:"numeric"});
+  const e = S.empresa;
+  const logo = e.logo ? `<img src="${e.logo}" style="height:52px">` : "";
+  const items = itemsCotizacion();
+  let sub=0; items.forEach(it=>sub+=it.cant*it.precio);
+  const total = sub*(1+(S.margen||0)/100) + (+(S.manoObra||0));
+  let totalMbps=0; S.camaras.forEach(c=>totalMbps += c.mbps!==undefined?c.mbps:BITRATE[resDeCam(c)]);
+  const gbDia = totalMbps/8*3600*(S.horasDia||24)/1024;
+
+  // capturas por piso
+  const pisoAct = S.pisoActivo;
+  let planos = "";
+  for (const p of S.pisos){
+    S.pisoActivo = p.id;
+    const tiene = elemsPiso(S.camaras).length || elemsPiso(S.dispositivos).length || p.bg;
+    if (!tiene) continue;
+    planos += `<div class="hoja"><h2>Plano de ubicación — ${esc(p.nombre)}</h2>
+      <img class="plano" src="${renderExport().toDataURL("image/jpeg",.9)}"></div>`;
+  }
+  S.pisoActivo = pisoAct;
+
+  const filasCam = S.camaras.map((c,i)=>{
+    const zc = (c.altura*0.66).toFixed(1);
+    return `<tr><td>${i+1}</td><td><b>${esc(c.nombre)}</b></td><td>${esc(c.modelo)}</td><td>${esc(c.res||"—")}</td>
+    <td>${Math.round(c.fov)}°</td><td>${Math.round(c.alcance)} m</td><td>${c.altura} m</td><td>${zc} m</td><td>${esc(c.ip||"—")}</td></tr>`;
+  }).join("");
+  const filasDisp = S.dispositivos.map((d,i)=>
+    `<tr><td>${i+1}</td><td><b>${esc(d.nombre)}</b></td><td>${TIPOS_DISP[d.kind].nombre}</td><td>${esc(d.modelo||"—")}</td><td>${esc(d.ip||"—")}</td></tr>`).join("");
+  const filasCot = items.map(it=>
+    `<tr><td>${esc(it.desc)}</td><td style="text-align:center">${it.cant}</td><td style="text-align:right">$ ${(+it.precio).toFixed(2)}</td><td style="text-align:right">$ ${(it.cant*it.precio).toFixed(2)}</td></tr>`).join("");
+  const {nodos, enlaces} = construirRed();
+  const svgD = nodos.length ? svgRed(nodos, enlaces, 900, 480) : "";
+
+  const diasTabla = [1,2,4,8,16].map(tb=>{
+    const dias = gbDia>0 ? Math.floor(tb*1024/gbDia) : 0;
+    return `<td style="text-align:center"><b>${dias}</b> días</td>`;
+  }).join("");
+
+  const v = window.open("","_blank");
+  v.document.write(`<!DOCTYPE html><html lang="es"><head><meta charset="utf-8">
+<title>Reporte — ${esc(S.nombre)}</title>
+<style>
+  body{font-family:'Segoe UI',sans-serif; color:#22313f; margin:0;}
+  .hoja{padding:34px 44px; page-break-after:always;}
+  .cab{display:flex; justify-content:space-between; align-items:center; border-bottom:3px solid #0d2b45; padding-bottom:14px; margin-bottom:22px;}
+  .cab h1{font-size:21px; color:#0d2b45; margin:0;}
+  .cab .datos{font-size:11.5px; color:#6b7d8f; text-align:right; line-height:1.6;}
+  h2{color:#0d2b45; font-size:17px; border-left:5px solid #00b894; padding-left:10px; margin:22px 0 12px;}
+  table{width:100%; border-collapse:collapse; font-size:11.5px;}
+  th{background:#0d2b45; color:#fff; padding:7px 8px; text-align:left; font-size:10.5px; text-transform:uppercase;}
+  td{padding:6px 8px; border-bottom:1px solid #dde4ea;}
+  tr:nth-child(even) td{background:#f7f9fa;}
+  .portada{height:92vh; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;}
+  .portada .marco{border:3px solid #0d2b45; border-radius:18px; padding:60px 70px;}
+  .portada h1{font-size:30px; color:#0d2b45; margin:14px 0 6px;}
+  .portada h3{color:#00997e; font-weight:600; margin:4px 0;}
+  .portada p{color:#6b7d8f; font-size:13px;}
+  .plano{width:100%; border:1px solid #dde4ea; border-radius:10px;}
+  .resumen{display:flex; gap:14px; margin:16px 0; flex-wrap:wrap;}
+  .kpi{border:1.5px solid #dde4ea; border-radius:11px; padding:13px 20px; text-align:center; flex:1;}
+  .kpi b{display:block; font-size:23px; color:#00997e;}
+  .kpi span{font-size:11px; color:#6b7d8f; text-transform:uppercase; letter-spacing:.5px;}
+  .totalC{font-size:17px; font-weight:800; color:#00997e; text-align:right; margin-top:10px;}
+  .pie{position:fixed; bottom:12px; left:44px; right:44px; font-size:10px; color:#9aa8b5; border-top:1px solid #dde4ea; padding-top:6px; display:flex; justify-content:space-between;}
+  @media print{ .no-imprimir{display:none} }
+</style></head><body>
+<div class="no-imprimir" style="background:#0d2b45;color:#fff;padding:12px;text-align:center;font-size:14px">
+  Vista previa del reporte — presiona <b>Ctrl+P</b> (o Cmd+P) y elige "Guardar como PDF".
+  <button onclick="window.print()" style="margin-left:14px;background:#00b894;color:#fff;border:none;border-radius:7px;padding:8px 16px;cursor:pointer;font-weight:700">🖨️ Imprimir / PDF</button>
+</div>
+
+<div class="hoja portada">
+  <div class="marco">
+    ${logo}
+    <h1>${esc(e.nombre)}</h1>
+    <h3>Propuesta técnica de videovigilancia</h3>
+    <p style="font-size:17px;color:#22313f;margin:18px 0 4px"><b>${esc(S.nombre)}</b></p>
+    ${S.cliente?`<p>Cliente: <b>${esc(S.cliente)}</b></p>`:""}
+    <p>${fecha}</p>
+    <p style="margin-top:16px">${esc(e.tel||"")} ${e.tel&&e.mail?" · ":""} ${esc(e.mail||"")}<br>${esc(e.dir||"")}</p>
+  </div>
+</div>
+
+<div class="hoja">
+  <div class="cab"><h1>Resumen del proyecto</h1><div class="datos">${esc(e.nombre)}<br>${esc(S.nombre)} · ${fecha}</div></div>
+  <div class="resumen">
+    <div class="kpi"><b>${S.camaras.length}</b><span>Cámaras</span></div>
+    <div class="kpi"><b>${S.dispositivos.length}</b><span>Dispositivos</span></div>
+    <div class="kpi"><b>${totalMbps.toFixed(1)}</b><span>Mbps totales</span></div>
+    <div class="kpi"><b>${gbDia.toFixed(0)}</b><span>GB por día</span></div>
+  </div>
+  <h2>Listado de cámaras</h2>
+  <table><thead><tr><th>#</th><th>Nombre</th><th>Modelo</th><th>Resolución</th><th>Ángulo</th><th>Alcance</th><th>Altura</th><th>Zona ciega</th><th>IP</th></tr></thead>
+  <tbody>${filasCam||'<tr><td colspan="9">Sin cámaras</td></tr>'}</tbody></table>
+  ${filasDisp?`<h2>Equipos de red y grabación</h2>
+  <table><thead><tr><th>#</th><th>Nombre</th><th>Tipo</th><th>Modelo</th><th>IP</th></tr></thead><tbody>${filasDisp}</tbody></table>`:""}
+  <h2>Almacenamiento estimado (grabación continua H.265)</h2>
+  <table><thead><tr><th>Disco</th><th style="text-align:center">1 TB</th><th style="text-align:center">2 TB</th><th style="text-align:center">4 TB</th><th style="text-align:center">8 TB</th><th style="text-align:center">16 TB</th></tr></thead>
+  <tbody><tr><td>Retención</td>${diasTabla}</tr></tbody></table>
+</div>
+
+${planos}
+
+${svgD?`<div class="hoja"><h2>Diagrama de red</h2><div style="text-align:center">${svgD}</div></div>`:""}
+
+${items.length?`<div class="hoja">
+  <div class="cab"><h1>Cotización</h1><div class="datos">${esc(e.nombre)}<br>${fecha} · Precios en MXN, no incluyen IVA</div></div>
+  <table><thead><tr><th>Descripción</th><th style="text-align:center">Cantidad</th><th style="text-align:right">Precio unitario</th><th style="text-align:right">Total</th></tr></thead>
+  <tbody>${filasCot}</tbody></table>
+  <div class="totalC">Subtotal: $ ${sub.toFixed(2)} &nbsp;·&nbsp; ${(S.margen||0)>0?`Margen ${S.margen}% · `:""}${(S.manoObra||0)>0?`Instalación $ ${(+S.manoObra).toFixed(2)} · `:""} TOTAL: $ ${total.toFixed(2)} MXN</div>
+  <p style="font-size:11px;color:#6b7d8f;margin-top:18px">Cotización válida por 15 días. Precios en pesos mexicanos (MXN), sujetos a cambio sin previo aviso. Los precios no incluyen IVA.</p>
+</div>`:""}
+
+<div class="pie"><span>${esc(e.nombre)} — ${esc(S.nombre)}</span><span>Generado con SSS Diseñador CCTV</span></div>
+</body></html>`);
+  v.document.close();
+}
+
+/* ---------- GUARDAR / ABRIR / INICIO ---------- */
+function guardarProyecto(){
+  S.nombre = document.getElementById("projName").value || "Proyecto sin título";
+  const json = JSON.stringify(S, filtroJson, 1);
+  const a = document.createElement("a");
+  a.download = S.nombre.replace(/[^\wáéíóúñ -]/gi,"")+".json";
+  a.href = URL.createObjectURL(new Blob([json],{type:"application/json"}));
+  a.click();
+  guardarLocal();
+  mostrarAviso("Proyecto guardado como archivo .json y respaldado en el navegador.");
+}
+function guardarLocal(){
+  try{
+    S.nombre = document.getElementById("projName").value || S.nombre;
+    const lista = JSON.parse(localStorage.getItem("sss_recientes")||"[]").filter(r=>r.nombre!==S.nombre);
+    lista.unshift({nombre:S.nombre, fecha:new Date().toISOString(), data:JSON.stringify(S,filtroJson)});
+    localStorage.setItem("sss_recientes", JSON.stringify(lista.slice(0,6)));
+  }catch(e){ /* límite de almacenamiento superado: sin respaldo local */ }
+}
+function cargarProyecto(obj){
+  S = Object.assign(proyectoNuevo(), obj);
+  // compatibilidad con proyectos guardados en versiones anteriores
+  S.capas = Object.assign({fov:true,muros:true,cables:true,etiquetas:true,objetos:true,fondo:true,wifi:true}, S.capas||{});
+  S.estiloIcono = S.estiloIcono || "circulo";
+  S.notas = S.notas ?? "";
+  (S.cables||[]).forEach(cb=>{ cb.pts = cb.pts||[]; });
+  document.getElementById("projName").value = S.nombre;
+  S.pisos.forEach(p=>{ if(p.bg) cargarImgPiso(p); });
+  seleccion=null; pilaUndo=[]; pilaRedo=[];
+  refrescarPisos(); cerrarPanel(); cerrarModal("modalInicio");
+  document.getElementById("btnCerrarInicio").style.display="block";
+  setTimeout(zoomAjustar, 120);
+  render();
+}
+function cargarImgPiso(p){
+  const img = new Image();
+  img.onload = ()=>{ p._img=img; render(); };
+  img.src = p.bg;
+}
+function nuevoProyectoVacio(){
+  cargarProyecto(proyectoNuevo());
+  mostrarAviso("Proyecto creado. Dibuja muros con 🧱 y agrega cámaras con 📹.");
+}
+document.getElementById("archivoPlano").addEventListener("change", ev=>{
+  const f = ev.target.files[0]; if (!f) return;
+  const lector = new FileReader();
+  lector.onload = ()=>{
+    const img = new Image();
+    img.onload = ()=>{
+      if (!S) S = proyectoNuevo();
+      const p = piso();
+      p.bg = lector.result; p.bgW = img.width; p.bgH = img.height;
+      p.escala = img.width/60;   // supone 60 m de ancho hasta calibrar
+      p._img = img;
+      document.getElementById("projName").value = S.nombre;
+      refrescarPisos(); cerrarModal("modalInicio");
+      document.getElementById("btnCerrarInicio").style.display="block";
+      setTimeout(zoomAjustar,80);
+      render();
+      mostrarAviso("Plano cargado. Usa 📐 Calibrar escala con una distancia conocida para que los metros sean reales.", 5200);
+    };
+    img.src = lector.result;
+  };
+  lector.readAsDataURL(f);
+  ev.target.value="";
+});
+document.getElementById("abrirArchivo").addEventListener("change", ev=>{
+  const f = ev.target.files[0]; if (!f) return;
+  const lector = new FileReader();
+  lector.onload = ()=>{
+    try{ cargarProyecto(JSON.parse(lector.result)); mostrarAviso("Proyecto abierto."); }
+    catch(e){ alert("El archivo no es un proyecto válido."); }
+  };
+  lector.readAsText(f);
+  ev.target.value="";
+});
+function abrirInicio(){
+  const wrap = document.getElementById("listaRecientes");
+  const lista = JSON.parse(localStorage.getItem("sss_recientes")||"[]");
+  wrap.innerHTML = lista.length ? lista.map((r,i)=>
+    `<div class="reciente-item" onclick="abrirReciente(${i})"><span>📁 ${esc(r.nombre)}</span><small>${new Date(r.fecha).toLocaleDateString("es-MX")}</small></div>`).join("")
+    : '<p class="mini">Aún no hay proyectos recientes.</p>';
+  document.getElementById("modalInicio").classList.add("abierto");
+  if (S) document.getElementById("btnCerrarInicio").style.display="block";
+}
+function abrirReciente(i){
+  const lista = JSON.parse(localStorage.getItem("sss_recientes")||"[]");
+  if (lista[i]) cargarProyecto(JSON.parse(lista[i].data));
+}
+function abrirEmpresa(){
+  const e = S.empresa;
+  document.getElementById("empNombre").value = e.nombre||"";
+  document.getElementById("empTel").value = e.tel||"";
+  document.getElementById("empMail").value = e.mail||"";
+  document.getElementById("empDir").value = e.dir||"";
+  document.getElementById("empCliente").value = S.cliente||"";
+  document.getElementById("empEstilo").value = S.estiloIcono||"circulo";
+  document.getElementById("modalEmpresa").classList.add("abierto");
+}
+function guardarEmpresa(){
+  const e = S.empresa;
+  e.nombre = document.getElementById("empNombre").value;
+  e.tel = document.getElementById("empTel").value;
+  e.mail = document.getElementById("empMail").value;
+  e.dir = document.getElementById("empDir").value;
+  S.cliente = document.getElementById("empCliente").value;
+  S.estiloIcono = document.getElementById("empEstilo").value;
+  render();
+  const f = document.getElementById("empLogo").files[0];
+  const fin = ()=>{ localStorage.setItem("sss_empresa", JSON.stringify(e)); cerrarModal("modalEmpresa"); mostrarAviso("Datos de la empresa guardados."); };
+  if (f){ const l=new FileReader(); l.onload=()=>{e.logo=l.result; fin();}; l.readAsDataURL(f); }
+  else fin();
+}
+
+/* ---------- ARRANQUE ---------- */
+window.addEventListener("load", ()=>{
+  canvas = document.getElementById("lienzo");
+  ctx = canvas.getContext("2d");
+  const wrap = document.getElementById("lienzoWrap");
+  const ajustar = ()=>{ canvas.style.width=wrap.clientWidth+"px"; canvas.style.height=wrap.clientHeight+"px"; render(); };
+  new ResizeObserver(ajustar).observe(wrap);
+  canvas.addEventListener("pointerdown", ev=>{ try{canvas.setPointerCapture(ev.pointerId);}catch(e){} onDown(ev); });
+  canvas.addEventListener("pointermove", onMove);
+  window.addEventListener("pointerup", onUp);
+  window.addEventListener("pointercancel", onUp);
+  canvas.addEventListener("dblclick", onDbl);
+  canvas.addEventListener("wheel", onWheel, {passive:false});
+  canvas.addEventListener("contextmenu", e=>e.preventDefault());
+  S = proyectoNuevo();
+  refrescarPisos();
+  abrirInicio();
+  document.getElementById("btnCerrarInicio").style.display="none";
+  ajustar();
+  setInterval(()=>{ if(S) guardarLocal(); }, 45000); // respaldo automático
+});
+</script>
+</body>
+</html>
