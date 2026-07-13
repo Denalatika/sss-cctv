@@ -185,6 +185,7 @@ table.t input.ancho{width:100%;}
   <button class="tool" data-tool="lbl" onclick="setTool('lbl')"><span>🏷️</span><span class="tip">Agregar etiqueta (T)</span></button>
   <div class="tool-sep"></div>
   <button class="tool" data-tool="cal" onclick="setTool('cal')"><span>📐</span><span class="tip">Calibrar escala (traza una distancia conocida)</span></button>
+  <button class="tool" onclick="document.getElementById('archivoPlano').click()"><span>🗺️</span><span class="tip">Agregar o cambiar imagen/plano de este piso</span></button>
   <button class="tool" onclick="deshacer()"><span>↩️</span><span class="tip">Deshacer (Ctrl+Z)</span></button>
   <button class="tool" onclick="rehacer()"><span>↪️</span><span class="tip">Rehacer (Ctrl+Y)</span></button>
   <button class="tool" onclick="borrarSeleccion()"><span>🗑️</span><span class="tip">Eliminar selección (Supr)</span></button>
@@ -388,6 +389,7 @@ let calTemp = null;      // calibración
 let dispPend = null, objPend = null;
 let pilaUndo = [], pilaRedo = [];
 let canvas, ctx;
+let punteros = new Map(), pinch = null;   // gesto de pellizco (zoom táctil)
 
 function proyectoNuevo(){
   return {
@@ -809,6 +811,19 @@ function distSeg(p,a,b){
 }
 
 function onDown(ev){
+  // --- zoom con dos dedos (iPad / pantalla táctil) ---
+  if (ev.pointerId!==undefined){
+    punteros.set(ev.pointerId, posMouse(ev));
+    if (punteros.size===2){
+      const [p1,p2] = [...punteros.values()];
+      if (muroTemp && muroTemp.length) muroTemp.pop(); // el primer dedo puso un punto sin querer
+      arrastre = null;
+      const midx=(p1.px+p2.px)/2, midy=(p1.py+p2.py)/2;
+      pinch = {d0: Math.hypot(p1.px-p2.px, p1.py-p2.py)||1, z0: vista.z, m0: aMundo(midx,midy)};
+      render(); return;
+    }
+    if (pinch) return;
+  }
   const {px,py} = posMouse(ev);
   const m = aMundo(px,py);
   if (ev.button===1 || tool==="pan" || ev.shiftKey){
@@ -931,6 +946,21 @@ function obtenerElem(hit){
   return mapa[hit.tipo].find(e=>e.id===hit.id);
 }
 function onMove(ev){
+  // --- seguimiento del pellizco ---
+  if (ev.pointerId!==undefined && punteros.has(ev.pointerId)) punteros.set(ev.pointerId, posMouse(ev));
+  if (pinch){
+    if (punteros.size>=2){
+      const [p1,p2] = [...punteros.values()];
+      const d = Math.hypot(p1.px-p2.px, p1.py-p2.py)||1;
+      const midx=(p1.px+p2.px)/2, midy=(p1.py+p2.py)/2;
+      vista.z = Math.max(2, Math.min(400, pinch.z0 * d/pinch.d0));
+      vista.x = midx - pinch.m0.x*vista.z;
+      vista.y = midy - pinch.m0.y*vista.z;
+      document.getElementById("zoomLbl").textContent = Math.round(vista.z/30*100)+"%";
+      render();
+    }
+    return;
+  }
   const {px,py} = posMouse(ev);
   const m = aMundo(px,py);
   if (arrastre){
@@ -965,7 +995,9 @@ function onMove(ev){
     canvas.style.cursor = hit ? (hit.tipo==="manija"?"grab":"move") : "default";
   }
 }
-function onUp(){
+function onUp(ev){
+  if (ev && ev.pointerId!==undefined) punteros.delete(ev.pointerId);
+  if (punteros.size<2) pinch=null;
   if (arrastre && arrastre.modo==="pan") canvas.style.cursor = tool==="pan"?"grab":"default";
   arrastre=null;
 }
@@ -1674,8 +1706,9 @@ document.getElementById("archivoPlano").addEventListener("change", ev=>{
     img.onload = ()=>{
       if (!S) S = proyectoNuevo();
       const p = piso();
+      const teniaImagen = !!p.bg;
       p.bg = lector.result; p.bgW = img.width; p.bgH = img.height;
-      p.escala = img.width/60;   // supone 60 m de ancho hasta calibrar
+      if (!teniaImagen) p.escala = img.width/60;   // supone 60 m de ancho hasta calibrar
       p._img = img;
       document.getElementById("projName").value = S.nombre;
       refrescarPisos(); cerrarModal("modalInicio");
@@ -1751,6 +1784,9 @@ window.addEventListener("load", ()=>{
   canvas.addEventListener("dblclick", onDbl);
   canvas.addEventListener("wheel", onWheel, {passive:false});
   canvas.addEventListener("contextmenu", e=>e.preventDefault());
+  // evita que Safari (iPad) haga zoom a toda la página: el pellizco lo maneja la app
+  canvas.addEventListener("gesturestart", e=>e.preventDefault());
+  canvas.addEventListener("gesturechange", e=>e.preventDefault());
   S = proyectoNuevo();
   refrescarPisos();
   abrirInicio();
