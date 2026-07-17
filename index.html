@@ -18,22 +18,42 @@ button{font-family:inherit; cursor:pointer;}
 input,select,textarea{font-family:inherit; font-size:13px;}
 
 /* ---------- BARRA SUPERIOR ---------- */
-#topbar{position:fixed; top:0; left:0; right:0; height:52px; background:var(--azul); color:#fff;
-  display:flex; align-items:center; gap:10px; padding:0 14px; z-index:50; box-shadow:var(--sombra);}
+#topbar{position:fixed; top:0; left:0; right:0; min-height:52px; background:var(--azul); color:#fff;
+  display:flex; align-items:center; flex-wrap:wrap; gap:8px; row-gap:6px; padding:6px 14px; z-index:50; box-shadow:var(--sombra);}
 #topbar .logo{display:flex; align-items:center; gap:9px; font-weight:700; font-size:15px; letter-spacing:.3px;}
 #topbar .logo .cube{width:30px; height:30px; border-radius:8px; background:linear-gradient(135deg,var(--acento),#0984e3);
   display:flex; align-items:center; justify-content:center; font-size:16px;}
 #topbar .logo small{display:block; font-weight:400; font-size:10px; opacity:.75; letter-spacing:.5px;}
 #projName{background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); color:#fff; border-radius:7px;
-  padding:6px 10px; width:230px; font-size:13px;}
+  padding:6px 10px; width:200px; min-width:110px; flex:0 1 200px; font-size:13px; height:34px;}
 #projName::placeholder{color:rgba(255,255,255,.5);}
 .tb-btn{background:rgba(255,255,255,.1); color:#fff; border:1px solid rgba(255,255,255,.18); border-radius:7px;
-  padding:7px 12px; font-size:12.5px; display:flex; align-items:center; gap:6px; transition:.15s;}
+  padding:7px 11px; font-size:12.5px; display:flex; align-items:center; gap:4px; transition:.15s;
+  white-space:nowrap; height:34px; flex-shrink:0;}
 .tb-btn:hover{background:rgba(255,255,255,.22);}
 .tb-btn.primario{background:var(--acento); border-color:var(--acento);}
 .tb-btn.primario:hover{background:var(--acento2);}
 .tb-sep{width:1px; height:26px; background:rgba(255,255,255,.18); margin:0 2px;}
 #saveState{font-size:11px; color:#93e2c8; white-space:nowrap; opacity:.9;}
+
+/* ---------- RESPONSIVO ---------- */
+@media (max-width:1380px){
+  .tb-txt{display:none;}                 /* solo iconos: nada se encima */
+  .tb-btn{font-size:16px; padding:7px 9px;}
+  .logo small{display:none;}
+}
+@media (max-width:1000px){
+  .logo-txt{display:none;}
+  #projName{flex:1 1 90px; width:auto;}
+  #saveState{display:none;}
+  #panel{width:min(300px, 88vw);}
+}
+@media (max-width:640px){
+  #bottombar{transform:translateX(-50%) scale(.9);}
+  #toolbar{width:50px;}
+  .tool{width:38px; height:38px; font-size:17px;}
+}
+#toolbar{max-height:calc(100vh - 150px); overflow-y:auto; overflow-x:hidden;}
 .spacer{flex:1;}
 
 /* ---------- BARRA DE HERRAMIENTAS ---------- */
@@ -156,22 +176,23 @@ table.t input.ancho{width:100%;}
 <body>
 <!-- ============ BARRA SUPERIOR ============ -->
 <div id="topbar">
-  <div class="logo"><div class="cube">🛡️</div><div>SSS Diseñador CCTV<small>Soluciones y Sistemas de Seguridad</small></div></div>
+  <div class="logo"><div class="cube">🛡️</div><div class="logo-txt">SSS Diseñador CCTV<small>Soluciones y Sistemas de Seguridad</small></div></div>
   <div class="tb-sep"></div>
   <input id="projName" type="text" placeholder="Nombre del proyecto..." value="Proyecto sin título">
-  <button class="tb-btn" onclick="abrirInicio()">🏠 <span>Inicio</span></button>
-  <button class="tb-btn" onclick="guardarProyecto()">💾 <span>Guardar</span></button>
-  <button class="tb-btn" onclick="document.getElementById('abrirArchivo').click()">📂 <span>Abrir</span></button>
+  <button class="tb-btn" title="Inicio" onclick="abrirInicio()">🏠<span class="tb-txt"> Inicio</span></button>
+  <button class="tb-btn" title="Guardar proyecto como archivo" onclick="guardarProyecto()">💾<span class="tb-txt"> Guardar</span></button>
+  <button class="tb-btn" title="Abrir proyecto" onclick="document.getElementById('abrirArchivo').click()">📂<span class="tb-txt"> Abrir</span></button>
   <input type="file" id="abrirArchivo" accept=".json,.ssscctv" style="display:none">
+  <input type="file" id="fotoEquipo" accept="image/*" style="display:none">
   <span id="saveState" title="Tu trabajo se guarda solo en este navegador"></span>
   <div class="spacer"></div>
-  <button class="tb-btn" onclick="abrirNotas()">📝 Notas</button>
-  <button class="tb-btn" onclick="abrirCotizacion()">💲 Cotización</button>
-  <button class="tb-btn" onclick="abrirAlmacen()">🗄️ Ancho de banda</button>
-  <button class="tb-btn" onclick="abrirRed()">🕸️ Diagrama de red</button>
-  <button class="tb-btn" onclick="exportarPNG()">🖼️ PNG</button>
-  <button class="tb-btn primario" onclick="generarReporte()">📄 Generar reporte</button>
-  <button class="tb-btn" onclick="abrirEmpresa()" title="Datos de la empresa">⚙️</button>
+  <button class="tb-btn" title="Notas del instalador" onclick="abrirNotas()">📝<span class="tb-txt"> Notas</span></button>
+  <button class="tb-btn" title="Cotización" onclick="abrirCotizacion()">💲<span class="tb-txt"> Cotización</span></button>
+  <button class="tb-btn" title="Ancho de banda y almacenamiento" onclick="abrirAlmacen()">🗄️<span class="tb-txt"> Almacenamiento</span></button>
+  <button class="tb-btn" title="Diagrama de red" onclick="abrirRed()">🕸️<span class="tb-txt"> Red</span></button>
+  <button class="tb-btn" title="Exportar plano como imagen PNG" onclick="exportarPNG()">🖼️<span class="tb-txt"> PNG</span></button>
+  <button class="tb-btn primario" title="Generar reporte PDF" onclick="generarReporte()">📄<span class="tb-txt"> Reporte</span></button>
+  <button class="tb-btn" onclick="abrirEmpresa()" title="Datos de la empresa y logo">⚙️</button>
 </div>
 
 <!-- ============ HERRAMIENTAS ============ -->
@@ -1282,6 +1303,13 @@ function abrirPanelSel(){
       <button class="btn gris" onclick="asignarIpSel()">🔢 Asignar siguiente IP libre</button>
       <div class="campo"><label>Color del cono</label><div class="colores" id="pColores">${PALETA.map(c=>`<div class="c ${c===el.color?"sel":""}" style="background:${c}" onclick="setColorCam('${c}')"></div>`).join("")}</div></div>
       <div class="sw"><span>Mostrar cono de visión</span><input type="checkbox" id="pVerFov" ${el.verFov?"checked":""}></div>
+      <div class="campo"><label>📷 Foto del equipo (sale en cotización y reporte)</label>
+        <div style="display:flex; gap:8px; align-items:center">
+          ${el.foto?`<img src="${el.foto}" style="width:54px;height:54px;object-fit:cover;border-radius:8px;border:1px solid var(--borde)">`:""}
+          <button class="btn gris" style="margin:0" onclick="pedirFotoEquipo()">${el.foto?"🔄 Cambiar":"📷 Subir foto"}</button>
+          ${el.foto?`<button class="btn rojo" style="width:auto;margin:0;padding:9px 11px" onclick="quitarFotoEquipo()">✕</button>`:""}
+        </div>
+        <div class="mini">Se aplica automáticamente a todas las cámaras del mismo modelo.</div></div>
       <button class="btn gris" onclick="duplicarSel()">⧉ Duplicar cámara (D)</button>
       <button class="btn rojo" onclick="borrarSeleccion()">🗑️ Eliminar cámara</button>`;
     const liga = (id,fn)=>{ const n=document.getElementById(id); n.addEventListener("input",()=>{fn(n); render(); actualizarPanelCam(el);}); };
@@ -1308,6 +1336,12 @@ function abrirPanelSel(){
       <div class="campo"><label>Alcance WiFi sin obstáculos (m)</label><input type="number" id="pWifiAlc" min="3" max="80" value="${el.wifi.alcance}"></div>
       <div class="sw"><span>Mostrar cobertura WiFi</span><input type="checkbox" id="pWifiVer" ${el.wifi.ver?"checked":""}></div>
       <div class="dato-calc">📶 La mancha azul es la señal estimada: cada muro que atraviesa reduce el alcance restante en un <b>60%</b>. Es una aproximación para planear; el material real de la pared puede variar.</div>`:""}
+      <div class="campo"><label>📷 Foto del equipo (sale en cotización y reporte)</label>
+        <div style="display:flex; gap:8px; align-items:center">
+          ${el.foto?`<img src="${el.foto}" style="width:54px;height:54px;object-fit:cover;border-radius:8px;border:1px solid var(--borde)">`:""}
+          <button class="btn gris" style="margin:0" onclick="pedirFotoEquipo()">${el.foto?"🔄 Cambiar":"📷 Subir foto"}</button>
+          ${el.foto?`<button class="btn rojo" style="width:auto;margin:0;padding:9px 11px" onclick="quitarFotoEquipo()">✕</button>`:""}
+        </div></div>
       <button class="btn gris" onclick="asignarIpSel()">🔢 Asignar siguiente IP libre</button>
       <button class="btn gris" onclick="duplicarSel()">⧉ Duplicar dispositivo (D)</button>
       <button class="btn rojo" onclick="borrarSeleccion()">🗑️ Eliminar dispositivo</button>`;
@@ -1459,12 +1493,14 @@ function itemsCotizacion(){
     const k = "CAM|"+c.modelo+"|"+(c.precio||0);
     grupos[k] = grupos[k] || {desc:"Cámara "+c.modelo, cant:0, precio:c.precio||0, auto:true};
     grupos[k].cant++;
+    if (c.foto && !grupos[k].foto) grupos[k].foto = c.foto;
   }
   for (const d of S.dispositivos){
     const td = TIPOS_DISP[d.kind];
     const k = "DEV|"+d.kind+"|"+(d.modelo||"")+"|"+(d.precio||0);
     grupos[k] = grupos[k] || {desc:td.nombre+(d.modelo?" "+d.modelo:""), cant:0, precio:d.precio||0, auto:true};
     grupos[k].cant++;
+    if (d.foto && !grupos[k].foto) grupos[k].foto = d.foto;
   }
   for (const k in grupos) items.push(grupos[k]);
   for (const it of S.itemsManuales) items.push(it);
@@ -1478,6 +1514,7 @@ function abrirCotizacion(){
     const tot = it.cant*it.precio; sub+=tot;
     const editable = !it.auto;
     return `<tr>
+      <td style="width:52px">${it.foto?`<img src="${it.foto}" style="width:44px;height:44px;object-fit:cover;border-radius:6px;cursor:pointer" title="Cambiar foto" onclick="pedirFotoItem(${i})">`:`<button class="btn gris" style="width:auto;margin:0;padding:6px 9px" title="Agregar foto del equipo" onclick="pedirFotoItem(${i})">📷</button>`}</td>
       <td>${editable?`<input class="ancho" value="${esc(it.desc)}" onchange="S.itemsManuales[${i-items.filter(x=>x.auto).length}].desc=this.value; abrirCotizacion()">`:esc(it.desc)} ${it.auto?'<span class="tag">del plano</span>':""}</td>
       <td>${editable?`<input type="number" min="1" value="${it.cant}" onchange="S.itemsManuales[${i-items.filter(x=>x.auto).length}].cant=+this.value||1; abrirCotizacion()">`:it.cant}</td>
       <td>${editable?`<input type="number" min="0" step="0.01" value="${it.precio}" onchange="S.itemsManuales[${i-items.filter(x=>x.auto).length}].precio=+this.value||0; abrirCotizacion()">`
@@ -1491,8 +1528,8 @@ function abrirCotizacion(){
   const conMargen = sub*(1+margen/100) + (+manoObra);
   cuerpo.innerHTML = `
     <table class="t">
-      <thead><tr><th>Descripción</th><th>Cant.</th><th>Precio unit. (MXN)</th><th style="text-align:right">Total</th><th></th></tr></thead>
-      <tbody>${filas || '<tr><td colspan="5" style="text-align:center;color:#6b7d8f">Agrega cámaras y dispositivos al plano, o artículos manuales.</td></tr>'}</tbody>
+      <thead><tr><th>Foto</th><th>Descripción</th><th>Cant.</th><th>Precio unit. (MXN)</th><th style="text-align:right">Total</th><th></th></tr></thead>
+      <tbody>${filas || '<tr><td colspan="6" style="text-align:center;color:#6b7d8f">Agrega cámaras y dispositivos al plano, o artículos manuales.</td></tr>'}</tbody>
     </table>
     <div style="display:flex; gap:16px; margin-top:14px; align-items:flex-end; flex-wrap:wrap">
       <div class="campo" style="margin:0"><label>Margen / utilidad (%)</label>
@@ -1713,7 +1750,9 @@ function generarReporte(){
   const filasDisp = S.dispositivos.map((d,i)=>
     `<tr><td>${i+1}</td><td><b>${esc(d.nombre)}</b></td><td>${TIPOS_DISP[d.kind].nombre}</td><td>${esc(d.modelo||"—")}</td><td>${esc(d.ip||"—")}</td></tr>`).join("");
   const filasCot = items.map(it=>
-    `<tr><td>${esc(it.desc)}</td><td style="text-align:center">${it.cant}</td><td style="text-align:right">$ ${(+it.precio).toFixed(2)}</td><td style="text-align:right">$ ${(it.cant*it.precio).toFixed(2)}</td></tr>`).join("");
+    `<tr><td style="width:54px">${it.foto?`<img src="${it.foto}" style="width:46px;height:46px;object-fit:cover;border-radius:6px">`:""}</td><td>${esc(it.desc)}</td><td style="text-align:center">${it.cant}</td><td style="text-align:right">$ ${(+it.precio).toFixed(2)}</td><td style="text-align:right">$ ${(it.cant*it.precio).toFixed(2)}</td></tr>`).join("");
+  const galeria = items.filter(it=>it.foto).map(it=>
+    `<div style="text-align:center; width:150px"><img src="${it.foto}" style="width:132px;height:112px;object-fit:contain;border:1px solid #dde4ea;border-radius:10px;background:#fff"><div style="font-size:10.5px;margin-top:5px;line-height:1.35">${esc(it.desc)}<br><b>× ${it.cant}</b></div></div>`).join("");
   const {nodos, enlaces} = construirRed();
   const svgD = nodos.length ? svgRed(nodos, enlaces, 900, 480) : "";
 
@@ -1793,7 +1832,8 @@ ${svgD?`<div class="hoja"><h2>Diagrama de red</h2><div style="text-align:center"
 
 ${items.length?`<div class="hoja">
   <div class="cab"><h1>Cotización</h1><div class="datos">${esc(e.nombre)}<br>${fecha} · Precios en MXN, no incluyen IVA</div></div>
-  <table><thead><tr><th>Descripción</th><th style="text-align:center">Cantidad</th><th style="text-align:right">Precio unitario</th><th style="text-align:right">Total</th></tr></thead>
+  ${galeria?`<h2>Equipos propuestos</h2><div style="display:flex; gap:14px; flex-wrap:wrap; margin-bottom:16px">${galeria}</div>`:""}
+  <table><thead><tr><th></th><th>Descripción</th><th style="text-align:center">Cantidad</th><th style="text-align:right">Precio unitario</th><th style="text-align:right">Total</th></tr></thead>
   <tbody>${filasCot}</tbody></table>
   <div class="totalC">Subtotal: $ ${sub.toFixed(2)} &nbsp;·&nbsp; ${(S.margen||0)>0?`Margen ${S.margen}% · `:""}${(S.manoObra||0)>0?`Instalación $ ${(+S.manoObra).toFixed(2)} · `:""} TOTAL: $ ${total.toFixed(2)} MXN</div>
   <p style="font-size:11px;color:#6b7d8f;margin-top:18px">Cotización válida por 15 días. Precios en pesos mexicanos (MXN), sujetos a cambio sin previo aviso. Los precios no incluyen IVA.</p>
@@ -1891,6 +1931,70 @@ function nuevoProyectoVacio(){
   cargarProyecto(proyectoNuevo());
   mostrarAviso("Proyecto creado. Dibuja muros con 🧱 y agrega cámaras con 📹.");
 }
+/* --- Fotos de equipos (aparecen en la cotización y el reporte) --- */
+let fotoCb = null;
+function comprimirFoto(f, cb){
+  const l = new FileReader();
+  l.onload = ()=>{
+    const img = new Image();
+    img.onload = ()=>{
+      const MAX = 480;
+      let w = img.width, h = img.height;
+      if (w > MAX){ h = Math.round(h*MAX/w); w = MAX; }
+      const cv = document.createElement("canvas"); cv.width = w; cv.height = h;
+      cv.getContext("2d").drawImage(img, 0, 0, w, h);
+      cb(cv.toDataURL("image/jpeg", 0.82));
+    };
+    img.src = l.result;
+  };
+  l.readAsDataURL(f);
+}
+function pedirFotoEquipo(){
+  fotoCb = (data)=>{
+    const el = obtenerElem(seleccion); if (!el) return;
+    el.foto = data;
+    if (seleccion.tipo==="cam"){
+      let n = 0;
+      S.camaras.forEach(c=>{ if (c.modelo===el.modelo){ c.foto = data; n++; } });
+      if (n>1) mostrarAviso(`Foto aplicada a las ${n} cámaras del modelo ${el.modelo}.`);
+    } else if (seleccion.tipo==="dev"){
+      S.dispositivos.forEach(d=>{ if (d.kind===el.kind && d.modelo===el.modelo) d.foto = data; });
+    }
+    abrirPanelSel(); programarGuardado();
+  };
+  document.getElementById("fotoEquipo").click();
+}
+function quitarFotoEquipo(){
+  const el = obtenerElem(seleccion); if (!el) return;
+  if (seleccion.tipo==="cam") S.camaras.forEach(c=>{ if (c.modelo===el.modelo) delete c.foto; });
+  else if (seleccion.tipo==="dev") S.dispositivos.forEach(d=>{ if (d.kind===el.kind && d.modelo===el.modelo) delete d.foto; });
+  delete el.foto;
+  abrirPanelSel(); programarGuardado();
+}
+function pedirFotoItem(i){
+  const items = itemsCotizacion();
+  const it = items[i]; if (!it) return;
+  fotoCb = (data)=>{
+    if (it.auto){
+      for (const c of S.camaras) if ("Cámara "+c.modelo===it.desc) c.foto = data;
+      for (const d of S.dispositivos){
+        const td = TIPOS_DISP[d.kind];
+        if (td.nombre+(d.modelo?" "+d.modelo:"")===it.desc) d.foto = data;
+      }
+    } else {
+      const idx = i - items.filter(x=>x.auto).length;
+      if (S.itemsManuales[idx]) S.itemsManuales[idx].foto = data;
+    }
+    abrirCotizacion(); programarGuardado();
+  };
+  document.getElementById("fotoEquipo").click();
+}
+document.getElementById("fotoEquipo").addEventListener("change", ev=>{
+  const f = ev.target.files[0];
+  if (f && fotoCb) comprimirFoto(f, fotoCb);
+  ev.target.value = "";
+});
+
 function cargarImagenArchivo(f){
   const lector = new FileReader();
   lector.onload = ()=>{
@@ -1995,6 +2099,18 @@ window.addEventListener("load", async ()=>{
   const wrap = document.getElementById("lienzoWrap");
   const ajustar = ()=>{ canvas.style.width=wrap.clientWidth+"px"; canvas.style.height=wrap.clientHeight+"px"; render(); };
   new ResizeObserver(ajustar).observe(wrap);
+  // si la barra superior ocupa dos filas, el lienzo y los paneles bajan para no encimarse
+  const barra = document.getElementById("topbar");
+  const ajustarBarras = ()=>{
+    const h = barra.offsetHeight;
+    wrap.style.top = h+"px";
+    document.getElementById("toolbar").style.top = (h+12)+"px";
+    document.getElementById("panel").style.top = (h+12)+"px";
+    document.getElementById("aviso").style.top = (h+12)+"px";
+  };
+  new ResizeObserver(ajustarBarras).observe(barra);
+  window.addEventListener("resize", ajustarBarras);
+  ajustarBarras();
   canvas.addEventListener("pointerdown", ev=>{ try{canvas.setPointerCapture(ev.pointerId);}catch(e){} onDown(ev); });
   canvas.addEventListener("pointermove", onMove);
   window.addEventListener("pointerup", onUp);
