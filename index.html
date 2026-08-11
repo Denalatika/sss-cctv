@@ -1738,7 +1738,7 @@ function generarReporte(){
     S.pisoActivo = p.id;
     const tiene = elemsPiso(S.camaras).length || elemsPiso(S.dispositivos).length || p.bg;
     if (!tiene) continue;
-    planos += `<div class="hoja"><h2>Plano de ubicación — ${esc(p.nombre)}</h2>
+    planos += `<div class="hoja salto"><h2>Plano de ubicación — ${esc(p.nombre)}</h2>
       <img class="plano" src="${renderExport().toDataURL("image/jpeg",.9)}"></div>`;
   }
   S.pisoActivo = pisoAct;
@@ -1753,7 +1753,7 @@ function generarReporte(){
   const filasCot = items.map(it=>
     `<tr><td style="width:54px">${it.foto?`<img src="${it.foto}" style="width:46px;height:46px;object-fit:cover;border-radius:6px">`:""}</td><td>${esc(it.desc)}</td><td style="text-align:center">${it.cant}</td><td style="text-align:right">$ ${(+it.precio).toFixed(2)}</td><td style="text-align:right">$ ${(it.cant*it.precio).toFixed(2)}</td></tr>`).join("");
   const galeria = items.filter(it=>it.foto).map(it=>
-    `<div style="text-align:center; width:150px"><img src="${it.foto}" style="width:132px;height:112px;object-fit:contain;border:1px solid #dde4ea;border-radius:10px;background:#fff"><div style="font-size:10.5px;margin-top:5px;line-height:1.35">${esc(it.desc)}<br><b>× ${it.cant}</b></div></div>`).join("");
+    `<div class="gal" style="text-align:center; width:150px"><img src="${it.foto}" style="width:132px;height:112px;object-fit:contain;border:1px solid #dde4ea;border-radius:10px;background:#fff"><div style="font-size:10.5px;margin-top:5px;line-height:1.35">${esc(it.desc)}<br><b>× ${it.cant}</b></div></div>`).join("");
   const {nodos, enlaces} = construirRed();
   const svgD = nodos.length ? svgRed(nodos, enlaces, 900, 480) : "";
 
@@ -1766,31 +1766,42 @@ function generarReporte(){
   v.document.write(`<!DOCTYPE html><html lang="es"><head><meta charset="utf-8">
 <title>Reporte — ${esc(S.nombre)}</title>
 <style>
-  body{font-family:'Segoe UI',sans-serif; color:#22313f; margin:0;}
-  .hoja{padding:34px 44px; page-break-after:always;}
-  .cab{display:flex; justify-content:space-between; align-items:center; border-bottom:3px solid #0d2b45; padding-bottom:14px; margin-bottom:22px;}
-  .cab h1{font-size:21px; color:#0d2b45; margin:0;}
+  *{box-sizing:border-box;}
+  @page{ size:A4; margin:13mm 12mm 15mm; }
+  body{font-family:'Segoe UI',sans-serif; color:#22313f; margin:0; background:#e9edf1;}
+  /* en pantalla cada sección se ve como hoja; al imprimir el contenido fluye de forma natural */
+  .hoja{background:#fff; max-width:840px; margin:16px auto; padding:36px 46px; box-shadow:0 2px 10px rgba(13,43,69,.10); border-radius:6px;}
+  .cab{display:flex; justify-content:space-between; align-items:center; border-bottom:3px solid #0d2b45; padding-bottom:12px; margin-bottom:20px;}
+  .cab h1{font-size:20px; color:#0d2b45; margin:0;}
   .cab .datos{font-size:11.5px; color:#6b7d8f; text-align:right; line-height:1.6;}
-  h2{color:#0d2b45; font-size:17px; border-left:5px solid #00b894; padding-left:10px; margin:22px 0 12px;}
+  h2{color:#0d2b45; font-size:16px; border-left:5px solid #00b894; padding-left:10px; margin:20px 0 10px;}
   table{width:100%; border-collapse:collapse; font-size:11.5px;}
   th{background:#0d2b45; color:#fff; padding:7px 8px; text-align:left; font-size:10.5px; text-transform:uppercase;}
-  td{padding:6px 8px; border-bottom:1px solid #dde4ea;}
+  td{padding:6px 8px; border-bottom:1px solid #dde4ea; vertical-align:middle;}
   tr:nth-child(even) td{background:#f7f9fa;}
-  .portada{height:92vh; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;}
-  .portada .marco{border:3px solid #0d2b45; border-radius:18px; padding:60px 70px;}
-  .portada h1{font-size:30px; color:#0d2b45; margin:14px 0 6px;}
+  .portada{display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; min-height:75vh;}
+  .portada .marco{border:3px solid #0d2b45; border-radius:18px; padding:50px 64px;}
+  .portada h1{font-size:29px; color:#0d2b45; margin:14px 0 6px;}
   .portada h3{color:#00997e; font-weight:600; margin:4px 0;}
   .portada p{color:#6b7d8f; font-size:13px;}
-  .plano{display:block; margin:0 auto; max-width:100%; max-height:21cm; width:auto; border:1px solid #dde4ea; border-radius:10px;}
+  .plano{display:block; margin:0 auto; max-width:100%; max-height:195mm; width:auto; border:1px solid #dde4ea; border-radius:10px;}
   svg{max-width:100%; height:auto;}
-  .hoja:last-of-type{page-break-after:auto;}
   .resumen{display:flex; gap:14px; margin:16px 0; flex-wrap:wrap;}
   .kpi{border:1.5px solid #dde4ea; border-radius:11px; padding:13px 20px; text-align:center; flex:1;}
   .kpi b{display:block; font-size:23px; color:#00997e;}
   .kpi span{font-size:11px; color:#6b7d8f; text-transform:uppercase; letter-spacing:.5px;}
-  .totalC{font-size:17px; font-weight:800; color:#00997e; text-align:right; margin-top:10px;}
-  .pie{position:fixed; bottom:12px; left:44px; right:44px; font-size:10px; color:#9aa8b5; border-top:1px solid #dde4ea; padding-top:6px; display:flex; justify-content:space-between;}
-  @media print{ .no-imprimir{display:none} }
+  .totalC{font-size:16px; font-weight:800; color:#00997e; text-align:right; margin-top:10px;}
+  .pieFin{font-size:10px; color:#9aa8b5; border-top:1px solid #dde4ea; margin-top:24px; padding-top:8px; display:flex; justify-content:space-between;}
+  @media print{
+    body{background:#fff;}
+    .no-imprimir{display:none;}
+    .hoja{box-shadow:none; border-radius:0; margin:0; padding:0 0 10px; max-width:none;}
+    .salto{page-break-before:always; padding-top:4px;}
+    .portada{min-height:245mm;}
+    h2{page-break-after:avoid;}
+    tr, .kpi, .plano, svg, .marco, .gal{page-break-inside:avoid; break-inside:avoid;}
+    thead{display:table-header-group;}  /* el encabezado se repite si la tabla sigue en otra página */
+  }
 </style></head><body>
 <div class="no-imprimir" style="background:#0d2b45;color:#fff;padding:12px;text-align:center;font-size:14px">
   Vista previa del reporte — presiona <b>Ctrl+P</b> (o Cmd+P) y elige "Guardar como PDF".
@@ -1809,7 +1820,7 @@ function generarReporte(){
   </div>
 </div>
 
-<div class="hoja">
+<div class="hoja salto">
   <div class="cab"><h1>Resumen del proyecto</h1><div class="datos">${esc(e.nombre)}<br>${esc(S.nombre)} · ${fecha}</div></div>
   <div class="resumen">
     <div class="kpi"><b>${S.camaras.length}</b><span>Cámaras</span></div>
@@ -1829,9 +1840,9 @@ function generarReporte(){
 
 ${planos}
 
-${svgD?`<div class="hoja"><h2>Diagrama de red</h2><div style="text-align:center">${svgD}</div></div>`:""}
+${svgD?`<div class="hoja salto"><h2>Diagrama de red</h2><div style="text-align:center">${svgD}</div></div>`:""}
 
-${items.length?`<div class="hoja">
+${items.length?`<div class="hoja salto">
   <div class="cab"><h1>Cotización</h1><div class="datos">${esc(e.nombre)}<br>${fecha} · Precios en MXN, no incluyen IVA</div></div>
   ${galeria?`<h2>Equipos propuestos</h2><div style="display:flex; gap:14px; flex-wrap:wrap; margin-bottom:16px">${galeria}</div>`:""}
   <table><thead><tr><th></th><th>Descripción</th><th style="text-align:center">Cantidad</th><th style="text-align:right">Precio unitario</th><th style="text-align:right">Total</th></tr></thead>
@@ -1840,7 +1851,9 @@ ${items.length?`<div class="hoja">
   <p style="font-size:11px;color:#6b7d8f;margin-top:18px">Cotización válida por 15 días. Precios en pesos mexicanos (MXN), sujetos a cambio sin previo aviso. Los precios no incluyen IVA.</p>
 </div>`:""}
 
-<div class="pie"><span>${esc(e.nombre)} — ${esc(S.nombre)}</span><span>Generado con SSS Diseñador CCTV</span></div>
+<div class="hoja" style="background:none; box-shadow:none; padding-top:0; margin-top:0">
+  <div class="pieFin"><span>${esc(e.nombre)} — ${esc(S.nombre)}</span><span>${fecha}</span></div>
+</div>
 </body></html>`);
   v.document.close();
 }
